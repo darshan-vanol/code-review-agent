@@ -10,7 +10,6 @@ _FINDING = [{
 
 def test_coverage_node_populates_test_suggestions():
     state = ReviewState(raw_diff="please suggest test coverage for app.py")
-    state._provider = MockProvider(scripted={"test": _FINDING})
-    out = test_coverage_node(state)
+    out = test_coverage_node(state, MockProvider(scripted={"test": _FINDING}))
     assert len(out.test_suggestions) == 1
     assert out.test_suggestions[0].category == "test"

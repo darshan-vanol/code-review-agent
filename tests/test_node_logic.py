@@ -10,7 +10,6 @@ _FINDING = [{
 
 def test_logic_node_populates_logic_findings():
     state = ReviewState(raw_diff="please run logic analysis of app.py")
-    state._provider = MockProvider(scripted={"logic": _FINDING})
-    out = logic_node(state)
+    out = logic_node(state, MockProvider(scripted={"logic": _FINDING}))
     assert len(out.logic_findings) == 1
     assert out.logic_findings[0].category == "logic"

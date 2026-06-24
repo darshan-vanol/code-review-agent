@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, Field
 
 
 class Severity(str, Enum):
@@ -69,8 +69,3 @@ class ReviewState(BaseModel):
     token_usage: dict[str, float] = Field(
         default_factory=lambda: {"input_tokens": 0, "output_tokens": 0, "latency_ms": 0.0}
     )
-
-    model_config = {"arbitrary_types_allowed": True}
-
-    # Provider is injected by the graph builder; excluded from serialization.
-    _provider: object | None = PrivateAttr(default=None)
