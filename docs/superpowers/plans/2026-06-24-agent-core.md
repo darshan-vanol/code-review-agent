@@ -1359,6 +1359,22 @@ git commit -m "chore: lint clean for agent core" || echo "nothing to commit"
 
 ---
 
+## Implementation note (post-execution — provider injection)
+
+Tasks 8 and 10 were planned to pass the provider on `ReviewState._provider` (a
+Pydantic `PrivateAttr`). During execution this was empirically found to fail:
+**LangGraph 1.2.6 reconstructs the Pydantic state between nodes and drops private
+attributes**, so `state._provider` was `None` inside every node. The shipped
+design instead **binds the provider into each LLM node with `functools.partial`
+at graph-build time**. Final interfaces (authoritative for Plan 2):
+
+- Analysis nodes take two args: `security_node(state, provider)`,
+  `logic_node(state, provider)`, `test_coverage_node(state, provider)`.
+- `ingest_node(state)` and `aggregate_node(state)` are unchanged (state only).
+- `build_graph(provider) -> CompiledGraph` (provider bound via `partial`).
+- `run_review(diff: str, provider: LLMProvider) -> ReviewState`.
+- `ReviewState` has **no** `_provider` / `model_config`; it keeps `token_usage`.
+
 ## Done criteria
 
 - `uv run pytest` is fully green.
