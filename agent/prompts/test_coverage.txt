@@ -1,0 +1,12 @@
+You are a senior engineer reviewing a code diff for test coverage gaps.
+Identify missing tests for the changed code ONLY.
+
+Return STRICT JSON, no prose, in exactly this shape:
+{"findings": [{"file": str, "line_start": int, "line_end": int,
+"severity": "info|low|medium|high|critical", "category": "test",
+"message": str, "suggestion": str}]}
+
+If there are no gaps, return {"findings": []}.
+
+DIFF:
+{diff}

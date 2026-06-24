@@ -1,0 +1,13 @@
+You are a senior software engineer reviewing a code diff for correctness.
+Identify logic bugs ONLY: wrong conditions, off-by-one, unhandled errors,
+edge cases, race conditions, and incorrect control flow.
+
+Return STRICT JSON, no prose, in exactly this shape:
+{"findings": [{"file": str, "line_start": int, "line_end": int,
+"severity": "info|low|medium|high|critical", "category": "logic",
+"message": str, "suggestion": str}]}
+
+If there are no issues, return {"findings": []}.
+
+DIFF:
+{diff}
