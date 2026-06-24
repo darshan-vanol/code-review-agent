@@ -51,7 +51,10 @@ class ReviewScore(BaseModel):
         for f in findings:
             counts[f.severity.value] += 1
             penalty += _SEVERITY_WEIGHT[f.severity]
-        # Clamp penalty so overall stays in [0, 1]; 1.0 == clean.
+        # `overall` is a 0..1 *cleanliness gauge*, not a severity-weighted sum:
+        # 1.0 means clean and it saturates at 0.0 once findings are serious enough
+        # (penalty >= 1.0). Callers needing to distinguish "bad" from "very bad"
+        # should read `counts`, which preserves per-severity detail.
         overall = max(0.0, 1.0 - min(penalty, 1.0))
         return cls(overall=round(overall, 3), counts=counts)
 

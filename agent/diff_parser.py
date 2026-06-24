@@ -6,7 +6,10 @@ from agent.state import FileDiff
 
 # File extensions we treat as non-code (docs / config prose).
 _DOC_EXTENSIONS = {".md", ".rst", ".txt"}
-_FILE_HEADER = re.compile(r"^\+\+\+ b/(.+)$")
+# Start each file at its `diff --git a/<old> b/<new>` header. Keying off this
+# (rather than `+++ b/...`) means deletions — whose new path is `+++ /dev/null` —
+# are still captured, using the new path, or the old path when the file is deleted.
+_DIFF_GIT_HEADER = re.compile(r"^diff --git a/(.+) b/(.+)$")
 _HUNK_HEADER = re.compile(r"^@@ ")
 
 
@@ -18,9 +21,11 @@ def parse_diff(raw: str) -> list[FileDiff]:
     current: FileDiff | None = None
 
     for line in raw.splitlines():
-        header = _FILE_HEADER.match(line)
+        header = _DIFF_GIT_HEADER.match(line)
         if header:
-            current = FileDiff(path=header.group(1), hunks=[])
+            old_path, new_path = header.group(1), header.group(2)
+            path = old_path if new_path == "/dev/null" else new_path
+            current = FileDiff(path=path, hunks=[])
             files.append(current)
             continue
         if current is None:

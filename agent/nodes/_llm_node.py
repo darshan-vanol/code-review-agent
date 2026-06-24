@@ -11,6 +11,14 @@ from agent.state import Finding
 # before degrading to an empty list so a single node never crashes the review.
 _MAX_ATTEMPTS = 2
 
+# Fixed system role. The per-node instruction template (which carries the diff)
+# is sent as the user message, so the system prompt stays a clean, reusable role
+# instruction rather than an unsubstituted template.
+SYSTEM_INSTRUCTION = (
+    "You are a senior code reviewer. Follow the instructions in the user message "
+    "and respond ONLY with strict JSON in the requested schema — no prose, no markdown."
+)
+
 
 def _parse_findings(text: str, category: str) -> list[Finding]:
     data = json.loads(text)

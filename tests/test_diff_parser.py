@@ -30,3 +30,14 @@ def test_is_trivial_true_for_whitespace_and_docs():
 def test_is_trivial_false_for_code_changes():
     files = parse_diff(_read("simple_python.diff"))
     assert is_trivial(files) is False
+
+
+def test_parse_deletion_diff_is_captured_and_not_trivial():
+    # A pure deletion uses `+++ /dev/null`; the file must still be parsed
+    # (path from the `diff --git` header) so code removals get reviewed.
+    files = parse_diff(_read("deleted_file.diff"))
+    assert len(files) == 1
+    assert files[0].path == "old_helper.py"
+    assert files[0].removed_lines == 3
+    assert files[0].added_lines == 0
+    assert is_trivial(files) is False
