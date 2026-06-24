@@ -1,4 +1,4 @@
-from agent.state import Finding, FileDiff, ReviewScore, ReviewState, Severity
+from agent.state import Finding, ReviewScore, ReviewState, Severity
 
 
 def test_finding_defaults_and_fields():
