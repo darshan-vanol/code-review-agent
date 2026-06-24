@@ -53,6 +53,7 @@ repo/
 │   └── observability.py  # Langfuse setup + per-node span helpers
 ├── api/                  # thin FastAPI layer
 │   ├── main.py           # app + routes
+│   ├── github.py         # PR URL -> unified diff (GitHub REST API)
 │   └── schemas.py        # request/response pydantic models
 ├── web/                  # Vite + React + TS dashboard
 ├── evals/
@@ -64,10 +65,11 @@ repo/
 └── README.md
 ```
 
-**Data flow:** client → `POST /review` (FastAPI) → `agent.graph.invoke(diff)` →
-LangGraph runs nodes, each wrapped in a Langfuse span → annotated JSON returned →
-dashboard renders it. Eval harness calls the same graph over the golden set and
-scores outputs with RAGAS.
+**Data flow:** client → `POST /review` (FastAPI, accepts either a raw `diff` or a
+`pr_url`) → if `pr_url`, `api/github.py` fetches the unified diff via the GitHub
+REST API → `agent.graph.invoke(diff)` → LangGraph runs nodes, each wrapped in a
+Langfuse span → annotated JSON returned → dashboard renders it. Eval harness
+calls the same graph over the golden set and scores outputs with RAGAS.
 
 ## 4. The LangGraph Agent
 
@@ -104,6 +106,24 @@ trivial diffs. Each LLM node validates output against the `Finding` schema and
 - The **mock provider still emits realistic spans** (synthetic tokens/latency)
   so the Langfuse dashboard is never empty in an offline demo.
 
+## 5b. GitHub Integration (Fetch PR by URL)
+
+Lets a user review a real PR without copy-pasting a diff.
+
+- **Input:** a GitHub PR URL (`https://github.com/owner/repo/pull/123`) or the
+  shorthand `owner/repo#123`. `api/github.py` parses it and fetches the unified
+  diff from the GitHub REST API (`GET /repos/{owner}/{repo}/pulls/{n}` with the
+  `application/vnd.github.v3.diff` media type).
+- **Auth:** optional `GITHUB_TOKEN` env var — anonymous works for public repos
+  (subject to rate limits); a token enables private repos and higher limits.
+- **API shape:** `POST /review` accepts **either** `{ "diff": "..." }` **or**
+  `{ "pr_url": "..." }`. Exactly one must be provided (422 otherwise). The PR
+  title/description are also fetched and passed to the agent as extra context.
+- **Errors:** clear messages for invalid URL, 404 (not found / private without
+  token), and GitHub rate-limit responses.
+- **Eval/CI unaffected:** the golden dataset stays as local diff files; GitHub
+  fetch is a convenience input path, not part of the eval loop.
+
 ## 6. Evaluation Harness (RAGAS)
 
 - **Golden dataset:** 20 synthetic PR diffs in `evals/golden/`, each with a
@@ -131,9 +151,10 @@ threshold."
 ## 8. Dashboard (Vite + React + TS)
 
 Two views:
-1. **Review playground** — paste a PR diff → calls `/review` → renders annotated
-   findings with severity badges, per-file grouping, and the overall score gauge.
-   Streams node progress if time permits (nice-to-have, not required).
+1. **Review playground** — either **paste a PR diff** *or* **enter a GitHub PR
+   URL** → calls `/review` → renders annotated findings with severity badges,
+   per-file grouping, and the overall score gauge. Streams node progress if time
+   permits (nice-to-have, not required).
 2. **Eval analytics** — reads eval reports: score trends across runs (line
    chart), per-PR drill-down table, faithfulness/correctness breakdown, and
    deep-links to the corresponding Langfuse traces.
@@ -151,7 +172,7 @@ Two views:
 ## 10. Phased Plan (~1 week)
 
 - **Day 1–2:** scaffold monorepo, LLM adapters + mock, LangGraph agent end-to-end returning JSON; unit tests on mock.
-- **Day 2–3:** FastAPI `/review` + health/version endpoints; Langfuse wiring.
+- **Day 2–3:** FastAPI `/review` (diff **or** PR-URL input) + GitHub fetch client + health/version endpoints; Langfuse wiring.
 - **Day 3–4:** author 20 golden PRs + ground truth; `run_eval.py` reaching ≥0.75.
 - **Day 4–5:** CI pipeline with gating + PR comment.
 - **Day 5–6:** React dashboard (playground + analytics).
@@ -174,7 +195,8 @@ Two views:
 
 ## 13. Out of Scope (YAGNI)
 
-- Real GitHub webhook / app integration (we accept raw diffs).
+- GitHub **webhook / App** auto-review bot (we support on-demand PR-URL fetch
+  and raw diffs, but not event-driven auto-commenting).
 - Auth / multi-user.
 - Persisting reviews to a database (eval reports are flat files).
 - Fine-tuning or custom models.
