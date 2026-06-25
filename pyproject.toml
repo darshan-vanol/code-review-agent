@@ -7,6 +7,10 @@ dependencies = [
     "langgraph>=0.2.0",
     "langchain-core>=0.3.0",
     "pydantic>=2.7",
+    "httpx>=0.28.1",
+    "langfuse>=4.12.0",
+    "fastapi>=0.138.0",
+    "uvicorn[standard]>=0.49.0",
 ]
 
 [project.optional-dependencies]
