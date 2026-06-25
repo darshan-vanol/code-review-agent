@@ -13,6 +13,14 @@ from api.schemas import ReviewRequest, ReviewResponse
 app = FastAPI(title="Code Review Assistant", version="0.1.0")
 
 
+def _strip_diff_headers(text: str) -> str:
+    """Remove `diff --git` lines from PR prose so the diff parser doesn't treat
+    them as real file boundaries when the prose is prepended to the diff."""
+    return "\n".join(
+        line for line in text.splitlines() if not line.startswith("diff --git")
+    )
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -37,8 +45,11 @@ def review(req: ReviewRequest) -> ReviewResponse:
             raise HTTPException(status_code=422, detail=str(e)) from e
         except GitHubError as e:
             raise HTTPException(status_code=502, detail=str(e)) from e
-        # Prepend PR title/body as context; the diff parser ignores non-diff prose.
-        diff = f"PR: {pr.title}\n\n{pr.body}\n\n{pr.diff}"
+        # Prepend PR title/body as context. The diff parser starts a file on any
+        # `diff --git` line, so strip such lines from the prose first to avoid a
+        # PR description injecting a phantom file into the parse.
+        context = _strip_diff_headers(f"PR: {pr.title}\n\n{pr.body}")
+        diff = f"{context}\n\n{pr.diff}"
     else:
         diff = req.diff or ""
 

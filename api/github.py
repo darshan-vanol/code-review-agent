@@ -7,7 +7,9 @@ import httpx
 
 _API = "https://api.github.com"
 _TIMEOUT_S = 30.0
-_FULL_URL = re.compile(r"github\.com/([^/]+)/([^/]+)/pull/(\d+)")
+# Anchor github.com to the start or a scheme separator so a host like
+# evil.com/github.com/o/r/pull/1 does not parse as a github.com PR.
+_FULL_URL = re.compile(r"(?:^|://)github\.com/([^/]+)/([^/]+)/pull/(\d+)")
 _SHORTHAND = re.compile(r"^([^/]+)/([^/#]+)#(\d+)$")
 
 

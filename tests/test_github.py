@@ -17,6 +17,12 @@ def test_parse_invalid_raises():
         parse_pr_url("not a pr url")
 
 
+def test_parse_rejects_github_com_as_non_host():
+    # A look-alike host must not be parsed as a real github.com PR URL.
+    with pytest.raises(ValueError):
+        parse_pr_url("https://evil.com/github.com/octocat/hello/pull/42")
+
+
 def _client() -> httpx.Client:
     def handler(request: httpx.Request) -> httpx.Response:
         accept = request.headers.get("accept", "")
