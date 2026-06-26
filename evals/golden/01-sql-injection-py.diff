@@ -1,0 +1,13 @@
+diff --git a/users/db.py b/users/db.py
+index 1111111..2222222 100644
+--- a/users/db.py
++++ b/users/db.py
+@@ -1,4 +1,7 @@
+ import sqlite3
+
+-def get_user(conn, uid):
+-    return conn.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
++def get_user(conn, uid):
++    # build query dynamically
++    query = "SELECT * FROM users WHERE id = '" + uid + "'"
++    return conn.execute(query).fetchone()

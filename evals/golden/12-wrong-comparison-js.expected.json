@@ -1,0 +1,17 @@
+{
+  "id": "12-wrong-comparison-js",
+  "language": "javascript",
+  "category": "logic",
+  "summary": "Changes <= to < in the session expiry check, allowing a session whose expiresAt equals the current time to be treated as still valid.",
+  "findings": [
+    {
+      "file": "auth/session.js",
+      "line_start": 2,
+      "line_end": 2,
+      "severity": "medium",
+      "category": "logic",
+      "message": "With `<` instead of `<=`, a session at exactly its expiry timestamp is incorrectly treated as active.",
+      "suggestion": "Revert to `session.expiresAt <= Date.now()` so sessions are expired at or past their expiry time."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+diff --git a/api/handlers.go b/api/handlers.go
+index 1234567..abcdef0 100644
+--- a/api/handlers.go
++++ b/api/handlers.go
+@@ -1,12 +1,10 @@
+ package api
+
+ import "net/http"
+
+ func AdminDeleteUser(w http.ResponseWriter, r *http.Request) {
+-    if !isAdmin(r) {
+-        http.Error(w, "forbidden", http.StatusForbidden)
+-        return
+-    }
+     userID := r.URL.Query().Get("id")
+     deleteUser(userID)
+     w.WriteHeader(http.StatusNoContent)
+ }

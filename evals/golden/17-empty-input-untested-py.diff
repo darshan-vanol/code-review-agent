@@ -1,0 +1,14 @@
+diff --git a/text/tokenizer.py b/text/tokenizer.py
+index 9876543..1234567 100644
+--- a/text/tokenizer.py
++++ b/text/tokenizer.py
+@@ -1,6 +1,10 @@
+ def tokenize(text: str) -> list[str]:
++    """Split text into lowercase tokens, filtering punctuation."""
++    import re
++    tokens = re.findall(r"\b\w+\b", text.lower())
++    return tokens
++
++# legacy alias kept for backward compat
+ def split_words(text: str) -> list[str]:
+     return text.split()

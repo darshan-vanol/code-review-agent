@@ -1,0 +1,17 @@
+{
+  "id": "08-none-deref-py",
+  "language": "python",
+  "category": "logic",
+  "summary": "Removes the None guard on fetch_order result, causing a TypeError when the order does not exist.",
+  "findings": [
+    {
+      "file": "services/order.py",
+      "line_start": 3,
+      "line_end": 4,
+      "severity": "high",
+      "category": "logic",
+      "message": "fetch_order can return None for a missing order; accessing order['items'] on None raises TypeError at runtime.",
+      "suggestion": "Restore the None check and raise a meaningful error before accessing order fields."
+    }
+  ]
+}

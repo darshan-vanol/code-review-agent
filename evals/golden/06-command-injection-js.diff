@@ -1,0 +1,14 @@
+diff --git a/utils/convert.js b/utils/convert.js
+index 9999999..8888888 100644
+--- a/utils/convert.js
++++ b/utils/convert.js
+@@ -1,8 +1,8 @@
+ const { execFile } = require('child_process');
+-const { exec } = require('child_process');
+
+ function convertImage(inputPath, outputPath) {
+-    execFile('convert', [inputPath, outputPath], (err) => { if (err) throw err; });
++    exec(`convert ${inputPath} ${outputPath}`, (err) => { if (err) throw err; });
+ }
+
+ module.exports = { convertImage };

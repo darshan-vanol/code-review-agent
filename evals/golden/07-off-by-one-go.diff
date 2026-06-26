@@ -1,0 +1,14 @@
+diff --git a/pkg/window/slice.go b/pkg/window/slice.go
+index 3333333..4444444 100644
+--- a/pkg/window/slice.go
++++ b/pkg/window/slice.go
+@@ -1,6 +1,6 @@
+ package window
+
+ func Last(xs []int, n int) []int {
+-    if n > len(xs) {
++    if n >= len(xs) {
+         n = len(xs)
+     }
+     return xs[len(xs)-n:]
+ }

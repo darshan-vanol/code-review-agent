@@ -1,0 +1,17 @@
+{
+  "id": "06-command-injection-js",
+  "language": "javascript",
+  "category": "security",
+  "summary": "Replaces execFile with exec and interpolates file paths directly into a shell command string, enabling command injection.",
+  "findings": [
+    {
+      "file": "utils/convert.js",
+      "line_start": 5,
+      "line_end": 5,
+      "severity": "high",
+      "category": "security",
+      "message": "exec() passes the full string to a shell; an inputPath like 'x; rm -rf /' would be executed by the shell.",
+      "suggestion": "Revert to execFile('convert', [inputPath, outputPath]) which does not invoke a shell and passes arguments as an array."
+    }
+  ]
+}

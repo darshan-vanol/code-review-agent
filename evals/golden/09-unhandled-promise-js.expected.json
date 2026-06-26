@@ -1,0 +1,17 @@
+{
+  "id": "09-unhandled-promise-js",
+  "language": "javascript",
+  "category": "logic",
+  "summary": "Removes try/catch from an async route handler, causing unhandled promise rejections and a process crash when saveFile fails.",
+  "findings": [
+    {
+      "file": "routes/upload.js",
+      "line_start": 5,
+      "line_end": 7,
+      "severity": "high",
+      "category": "logic",
+      "message": "An awaited async call without try/catch will produce an unhandled rejection in Express 4, crashing the process.",
+      "suggestion": "Wrap the await in try/catch and respond with an appropriate HTTP error status on failure."
+    }
+  ]
+}

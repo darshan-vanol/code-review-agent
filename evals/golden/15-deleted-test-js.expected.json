@@ -1,0 +1,17 @@
+{
+  "id": "15-deleted-test-js",
+  "language": "javascript",
+  "category": "test",
+  "summary": "Deletes two tests covering removeFromCart error and happy paths without any replacement coverage.",
+  "findings": [
+    {
+      "file": "tests/cart.test.js",
+      "line_start": 4,
+      "line_end": 12,
+      "severity": "medium",
+      "category": "test",
+      "message": "Removing the removeFromCart tests leaves the not-found error path and normal removal completely uncovered.",
+      "suggestion": "Restore both deleted tests or replace them with equivalent coverage before merging."
+    }
+  ]
+}

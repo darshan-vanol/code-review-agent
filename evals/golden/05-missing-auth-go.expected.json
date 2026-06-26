@@ -1,0 +1,17 @@
+{
+  "id": "05-missing-auth-go",
+  "language": "go",
+  "category": "security",
+  "summary": "Removes the admin authorization check from a user-deletion handler, allowing any unauthenticated caller to delete arbitrary users.",
+  "findings": [
+    {
+      "file": "api/handlers.go",
+      "line_start": 6,
+      "line_end": 9,
+      "severity": "critical",
+      "category": "security",
+      "message": "The isAdmin guard was removed; any caller can now invoke AdminDeleteUser and delete any user record.",
+      "suggestion": "Restore the isAdmin(r) check before processing the deletion, or apply an auth middleware at the router level."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "03-path-traversal-py",
+  "language": "python",
+  "category": "security",
+  "summary": "Removes the os.path.basename sanitization, allowing path traversal via filenames like '../../etc/passwd'.",
+  "findings": [
+    {
+      "file": "api/files.py",
+      "line_start": 8,
+      "line_end": 9,
+      "severity": "high",
+      "category": "security",
+      "message": "User-supplied filename is joined to BASE_DIR without stripping directory components, enabling path traversal to read arbitrary files.",
+      "suggestion": "Restore os.path.basename(filename) or use pathlib to verify the resolved path is under BASE_DIR."
+    }
+  ]
+}

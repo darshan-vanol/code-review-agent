@@ -1,0 +1,17 @@
+{
+  "id": "14-no-test-new-func-py",
+  "language": "python",
+  "category": "test",
+  "summary": "Adds a new public function calculate_partial_refund with branching logic but no corresponding test cases.",
+  "findings": [
+    {
+      "file": "payments/refund.py",
+      "line_start": 7,
+      "line_end": 14,
+      "severity": "medium",
+      "category": "test",
+      "message": "calculate_partial_refund introduces a ValueError branch and quantize rounding but no tests cover these paths.",
+      "suggestion": "Add tests for: valid percentage (e.g. 0.5), boundary 1.0, out-of-range values (0, 1.1), and rounding behaviour."
+    }
+  ]
+}

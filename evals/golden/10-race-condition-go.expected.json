@@ -1,0 +1,17 @@
+{
+  "id": "10-race-condition-go",
+  "language": "go",
+  "category": "logic",
+  "summary": "Removes the mutex protecting the counter, introducing a data race when Increment is called from multiple goroutines.",
+  "findings": [
+    {
+      "file": "counter/counter.go",
+      "line_start": 9,
+      "line_end": 10,
+      "severity": "high",
+      "category": "logic",
+      "message": "Counter.Increment is no longer protected by a mutex; concurrent calls cause a data race on c.value.",
+      "suggestion": "Restore sync.Mutex and the Lock/Unlock calls, or use sync/atomic.AddInt64 for a lock-free alternative."
+    }
+  ]
+}

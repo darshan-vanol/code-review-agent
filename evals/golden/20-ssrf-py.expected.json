@@ -1,0 +1,17 @@
+{
+  "id": "20-ssrf-py",
+  "language": "python",
+  "category": "security",
+  "summary": "Removes the allowlist check on the webhook target URL, enabling SSRF by allowing requests to internal infrastructure.",
+  "findings": [
+    {
+      "file": "webhooks/proxy.py",
+      "line_start": 6,
+      "line_end": 8,
+      "severity": "high",
+      "category": "security",
+      "message": "The host allowlist guard is removed; an attacker can supply any URL (e.g. http://169.254.169.254/latest/meta-data/) causing the server to make requests to internal services.",
+      "suggestion": "Restore the allowlist check before calling httpx.post, and ensure the parsed hostname is compared after resolving any redirects."
+    }
+  ]
+}

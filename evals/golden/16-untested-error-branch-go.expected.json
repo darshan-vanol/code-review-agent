@@ -1,0 +1,17 @@
+{
+  "id": "16-untested-error-branch-go",
+  "language": "go",
+  "category": "test",
+  "summary": "Adds a new nil-row not-found branch to FindByID but the accompanying test file has no test for this case.",
+  "findings": [
+    {
+      "file": "store/repo.go",
+      "line_start": 12,
+      "line_end": 14,
+      "severity": "low",
+      "category": "test",
+      "message": "The new nil-row branch returns a formatted error but is not covered by any test, leaving the error message format unverified.",
+      "suggestion": "Add a test that mocks QueryRow to return (nil, nil) and asserts the returned error contains 'not found'."
+    }
+  ]
+}
