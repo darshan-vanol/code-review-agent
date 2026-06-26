@@ -1,0 +1,17 @@
+{
+  "id": "19-nil-deref-go",
+  "language": "go",
+  "category": "logic",
+  "summary": "Removes the nil-client guard in Sender.Send, causing a nil pointer dereference panic when client is not initialised.",
+  "findings": [
+    {
+      "file": "notify/sender.go",
+      "line_start": 6,
+      "line_end": 6,
+      "severity": "high",
+      "category": "logic",
+      "message": "Calling s.client.Send when s.client is nil causes a panic; the removed guard was the only protection against this.",
+      "suggestion": "Restore the nil check and return the error, or enforce non-nil client at construction time using a constructor function."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+diff --git a/webhooks/proxy.py b/webhooks/proxy.py
+index aaaaaa1..bbbbbbb2 100644
+--- a/webhooks/proxy.py
++++ b/webhooks/proxy.py
+@@ -1,10 +1,8 @@
+ import httpx
++from urllib.parse import urlparse
+
+ ALLOWED_HOSTS = {"hooks.example.com", "api.partner.io"}
+
+ def forward_webhook(url: str, payload: dict) -> dict:
+-    host = urlparse(url).hostname
+-    if host not in ALLOWED_HOSTS:
+-        raise ValueError(f"Host {host!r} not in allowlist")
+     response = httpx.post(url, json=payload, timeout=5)
+     return response.json()

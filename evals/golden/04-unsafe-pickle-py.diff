@@ -1,0 +1,13 @@
+diff --git a/cache/loader.py b/cache/loader.py
+index eeeeeee..fffffff 100644
+--- a/cache/loader.py
++++ b/cache/loader.py
+@@ -1,8 +1,8 @@
+ import json
++import pickle
+ from pathlib import Path
+
+ def load_cache(path: str):
+     data = Path(path).read_bytes()
+-    return json.loads(data)
++    return pickle.loads(data)

@@ -1,0 +1,17 @@
+{
+  "id": "01-sql-injection-py",
+  "language": "python",
+  "category": "security",
+  "summary": "Introduces a SQL injection by interpolating user input directly into the query string instead of using a parameterized query.",
+  "findings": [
+    {
+      "file": "users/db.py",
+      "line_start": 5,
+      "line_end": 6,
+      "severity": "high",
+      "category": "security",
+      "message": "User-controlled `uid` is concatenated into the SQL string, enabling SQL injection.",
+      "suggestion": "Use a parameterized query: conn.execute(\"SELECT * FROM users WHERE id = ?\", (uid,))."
+    }
+  ]
+}

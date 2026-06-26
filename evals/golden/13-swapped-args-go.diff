@@ -1,0 +1,14 @@
+diff --git a/geometry/rect.go b/geometry/rect.go
+index 1234560..abcdef1 100644
+--- a/geometry/rect.go
++++ b/geometry/rect.go
+@@ -1,8 +1,8 @@
+ package geometry
+
+ type Rect struct{ Width, Height float64 }
+
+-func NewRect(width, height float64) Rect {
+-    return Rect{Width: width, Height: height}
++func NewRect(width, height float64) Rect {
++    return Rect{Width: height, Height: width}
+ }

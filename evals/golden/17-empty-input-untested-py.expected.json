@@ -1,0 +1,17 @@
+{
+  "id": "17-empty-input-untested-py",
+  "language": "python",
+  "category": "test",
+  "summary": "Introduces a tokenize function with regex logic but no tests for empty string, punctuation-only, or unicode input edge cases.",
+  "findings": [
+    {
+      "file": "text/tokenizer.py",
+      "line_start": 1,
+      "line_end": 4,
+      "severity": "low",
+      "category": "test",
+      "message": "tokenize has no tests; edge cases like empty string, strings with only punctuation, and unicode text are unverified.",
+      "suggestion": "Add tests: tokenize('') == [], tokenize('!!!') == [], and a sample sentence with mixed case and punctuation."
+    }
+  ]
+}

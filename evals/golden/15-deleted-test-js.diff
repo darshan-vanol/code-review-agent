@@ -1,0 +1,21 @@
+diff --git a/tests/cart.test.js b/tests/cart.test.js
+index aaaaaab..bbbbbbc 100644
+--- a/tests/cart.test.js
++++ b/tests/cart.test.js
+@@ -1,16 +1,6 @@
+ const { addToCart, removeFromCart } = require('../cart');
+
+ describe('cart', () => {
+-    test('removeFromCart throws when item not present', () => {
+-        const cart = [];
+-        expect(() => removeFromCart(cart, 'ghost-item')).toThrow('Item not found');
+-    });
+-
+-    test('removeFromCart returns updated cart', () => {
+-        const cart = [{ id: 'a', qty: 1 }];
+-        expect(removeFromCart(cart, 'a')).toEqual([]);
+-    });
+-
+     test('addToCart increments qty for existing item', () => {
+         const cart = [{ id: 'a', qty: 1 }];
+         expect(addToCart(cart, 'a').find(i => i.id === 'a').qty).toBe(2);

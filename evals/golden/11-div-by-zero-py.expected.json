@@ -1,0 +1,17 @@
+{
+  "id": "11-div-by-zero-py",
+  "language": "python",
+  "category": "logic",
+  "summary": "Removes the empty-list guard, causing a ZeroDivisionError when average() is called with an empty list.",
+  "findings": [
+    {
+      "file": "stats/metrics.py",
+      "line_start": 2,
+      "line_end": 3,
+      "severity": "medium",
+      "category": "logic",
+      "message": "Division by len(values) will raise ZeroDivisionError when values is an empty list.",
+      "suggestion": "Restore the empty-list check: if not values: return 0.0 (or raise ValueError depending on the desired contract)."
+    }
+  ]
+}

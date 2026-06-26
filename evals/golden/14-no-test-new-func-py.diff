@@ -1,0 +1,18 @@
+diff --git a/payments/refund.py b/payments/refund.py
+index 1111abc..2222bcd 100644
+--- a/payments/refund.py
++++ b/payments/refund.py
+@@ -1,5 +1,14 @@
+ from decimal import Decimal
+
+ def calculate_refund(amount: Decimal, fee_rate: Decimal) -> Decimal:
+     return amount * (1 - fee_rate)
++
++def calculate_partial_refund(
++    amount: Decimal, fee_rate: Decimal, percentage: Decimal
++) -> Decimal:
++    """Return a partial refund for `percentage` of the original amount."""
++    if not (0 < percentage <= 1):
++        raise ValueError("percentage must be in (0, 1]")
++    base = calculate_refund(amount, fee_rate)
++    return (base * percentage).quantize(Decimal("0.01"))

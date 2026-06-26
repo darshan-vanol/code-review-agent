@@ -1,0 +1,20 @@
+diff --git a/routes/upload.js b/routes/upload.js
+index 1122334..5566778 100644
+--- a/routes/upload.js
++++ b/routes/upload.js
+@@ -1,10 +1,9 @@
+ const express = require('express');
+ const router = express.Router();
+
+ router.post('/upload', async (req, res) => {
+-    try {
+-        const result = await saveFile(req.body);
+-        res.json({ ok: true, id: result.id });
+-    } catch (err) {
+-        res.status(500).json({ error: err.message });
+-    }
++    const result = await saveFile(req.body);
++    res.json({ ok: true, id: result.id });
+ });
+
+ module.exports = router;

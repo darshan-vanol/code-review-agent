@@ -1,0 +1,17 @@
+{
+  "id": "04-unsafe-pickle-py",
+  "language": "python",
+  "category": "security",
+  "summary": "Replaces safe JSON deserialization with pickle.loads on untrusted file data, enabling arbitrary code execution.",
+  "findings": [
+    {
+      "file": "cache/loader.py",
+      "line_start": 7,
+      "line_end": 7,
+      "severity": "critical",
+      "category": "security",
+      "message": "pickle.loads on attacker-controlled bytes can execute arbitrary code during deserialization.",
+      "suggestion": "Keep json.loads for untrusted data. If binary format is needed, use a safe alternative like msgpack with schema validation."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "18-no-test-ts-func-js",
+  "language": "javascript",
+  "category": "test",
+  "summary": "Adds parseCurrencyString with error handling and rounding logic but provides no tests for any of its paths.",
+  "findings": [
+    {
+      "file": "src/utils/currency.ts",
+      "line_start": 5,
+      "line_end": 13,
+      "severity": "medium",
+      "category": "test",
+      "message": "parseCurrencyString has no test coverage; the NaN error branch, rounding edge cases (e.g. '$1.005'), and comma-separated values are all untested.",
+      "suggestion": "Add unit tests: parseCurrencyString('$1,234.56') === 123456, parseCurrencyString('abc') throws, and a rounding boundary case."
+    }
+  ]
+}

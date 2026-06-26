@@ -1,0 +1,17 @@
+diff --git a/src/utils/currency.ts b/src/utils/currency.ts
+index aabbcc1..ddeeff2 100644
+--- a/src/utils/currency.ts
++++ b/src/utils/currency.ts
+@@ -1,5 +1,14 @@
+ export function formatCents(cents: number): string {
+     return `$${(cents / 100).toFixed(2)}`;
+ }
++
++export function parseCurrencyString(s: string): number {
++    const cleaned = s.replace(/[$,]/g, '');
++    const val = parseFloat(cleaned);
++    if (isNaN(val)) {
++        throw new Error(`Invalid currency string: ${s}`);
++    }
++    return Math.round(val * 100);
++}

@@ -1,0 +1,21 @@
+diff --git a/store/repo.go b/store/repo.go
+index 5555555..6666666 100644
+--- a/store/repo.go
++++ b/store/repo.go
+@@ -1,10 +1,18 @@
+ package store
+
+ import "fmt"
+
+ type Repo struct{ db DB }
+
+ func (r *Repo) FindByID(id int) (*Record, error) {
+     row, err := r.db.QueryRow("SELECT * FROM records WHERE id = $1", id)
+     if err != nil {
+         return nil, fmt.Errorf("query: %w", err)
+     }
++    if row == nil {
++        return nil, fmt.Errorf("record %d not found", id)
++    }
+     return parseRow(row)
+ }

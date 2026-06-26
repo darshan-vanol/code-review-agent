@@ -1,0 +1,15 @@
+diff --git a/notify/sender.go b/notify/sender.go
+index abcdef1..abcdef2 100644
+--- a/notify/sender.go
++++ b/notify/sender.go
+@@ -1,11 +1,9 @@
+ package notify
+
+ type Sender struct{ client *EmailClient }
+
+ func (s *Sender) Send(to, body string) error {
+-    if s.client == nil {
+-        return fmt.Errorf("email client not initialised")
+-    }
+     return s.client.Send(to, body)
+ }

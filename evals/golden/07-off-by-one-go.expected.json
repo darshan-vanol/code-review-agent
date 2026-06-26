@@ -1,0 +1,17 @@
+{
+  "id": "07-off-by-one-go",
+  "language": "go",
+  "category": "logic",
+  "summary": "Changes a boundary check from `>` to `>=`, which is harmless here but the function still panics when n is negative.",
+  "findings": [
+    {
+      "file": "pkg/window/slice.go",
+      "line_start": 4,
+      "line_end": 4,
+      "severity": "low",
+      "category": "logic",
+      "message": "`n >= len(xs)` clamps one case earlier than needed; negative n still causes a slice out-of-range panic.",
+      "suggestion": "Guard against n < 0 before slicing, e.g. if n < 0 { n = 0 }."
+    }
+  ]
+}

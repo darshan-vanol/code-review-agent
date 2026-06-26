@@ -1,0 +1,11 @@
+diff --git a/services/order.py b/services/order.py
+index aaabbbb..cccdddd 100644
+--- a/services/order.py
++++ b/services/order.py
+@@ -1,9 +1,8 @@
+ def get_order_total(order_id: int) -> float:
+     order = fetch_order(order_id)
+-    if order is None:
+-        raise ValueError(f"Order {order_id} not found")
+     items = order["items"]
+     return sum(item["price"] * item["qty"] for item in items)

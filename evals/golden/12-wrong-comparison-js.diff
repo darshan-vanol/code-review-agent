@@ -1,0 +1,15 @@
+diff --git a/auth/session.js b/auth/session.js
+index aabbccd..eeffgg0 100644
+--- a/auth/session.js
++++ b/auth/session.js
+@@ -1,8 +1,8 @@
+ function isExpired(session) {
+-    return session.expiresAt <= Date.now();
++    return session.expiresAt < Date.now();
+ }
+
+ function requireActive(session) {
+     if (isExpired(session)) {
+         throw new Error('Session expired');
+     }
+ }
