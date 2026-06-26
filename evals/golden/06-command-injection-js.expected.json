@@ -6,8 +6,8 @@
   "findings": [
     {
       "file": "utils/convert.js",
-      "line_start": 5,
-      "line_end": 5,
+      "line_start": 4,
+      "line_end": 4,
       "severity": "high",
       "category": "security",
       "message": "exec() passes the full string to a shell; an inputPath like 'x; rm -rf /' would be executed by the shell.",

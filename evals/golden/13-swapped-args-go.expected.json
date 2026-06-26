@@ -6,8 +6,8 @@
   "findings": [
     {
       "file": "geometry/rect.go",
-      "line_start": 7,
-      "line_end": 7,
+      "line_start": 6,
+      "line_end": 6,
       "severity": "medium",
       "category": "logic",
       "message": "Width is assigned height and Height is assigned width; every Rect constructed via NewRect will have swapped dimensions.",

@@ -26,9 +26,11 @@ def run(out_dir: Path, *, provider=None, scorer=None, goldens=None,
     report, markdown = render_report(scores, per_item, threshold=threshold)
 
     out_dir.mkdir(parents=True, exist_ok=True)
+    # Zero-pad so reports sort lexically in order past 9 (CI picks the latest .md).
     n = len(list(out_dir.glob("*.json"))) + 1
-    (out_dir / f"{n}.json").write_text(json.dumps(report, indent=2))
-    (out_dir / f"{n}.md").write_text(markdown)
+    stem = f"{n:03d}"
+    (out_dir / f"{stem}.json").write_text(json.dumps(report, indent=2))
+    (out_dir / f"{stem}.md").write_text(markdown)
     print(markdown)
     return 0 if report["passed"] else 1
 
@@ -39,8 +41,9 @@ def main() -> None:
     parser.add_argument("--threshold", default=THRESHOLD, type=float)
     parser.add_argument("--provider", default=None)
     args = parser.parse_args()
-    provider = make_provider(args.provider) if args.provider else make_provider()
-    sys.exit(run(args.out_dir, provider=provider, threshold=args.threshold))
+    sys.exit(run(
+        args.out_dir, provider=make_provider(args.provider), threshold=args.threshold
+    ))
 
 
 if __name__ == "__main__":

@@ -6,8 +6,8 @@
   "findings": [
     {
       "file": "payments/refund.py",
-      "line_start": 7,
-      "line_end": 14,
+      "line_start": 6,
+      "line_end": 13,
       "severity": "medium",
       "category": "test",
       "message": "calculate_partial_refund introduces a ValueError branch and quantize rounding but no tests cover these paths.",

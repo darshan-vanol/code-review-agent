@@ -6,8 +6,8 @@
   "findings": [
     {
       "file": "api/files.py",
-      "line_start": 8,
-      "line_end": 9,
+      "line_start": 7,
+      "line_end": 8,
       "severity": "high",
       "category": "security",
       "message": "User-supplied filename is joined to BASE_DIR without stripping directory components, enabling path traversal to read arbitrary files.",

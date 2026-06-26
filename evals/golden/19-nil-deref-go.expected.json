@@ -6,8 +6,8 @@
   "findings": [
     {
       "file": "notify/sender.go",
-      "line_start": 7,
-      "line_end": 9,
+      "line_start": 6,
+      "line_end": 6,
       "severity": "high",
       "category": "logic",
       "message": "Calling s.client.Send when s.client is nil causes a panic; the removed guard was the only protection against this.",

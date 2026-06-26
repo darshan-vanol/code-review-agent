@@ -6,8 +6,8 @@
   "findings": [
     {
       "file": "tests/cart.test.js",
-      "line_start": 4,
-      "line_end": 12,
+      "line_start": 3,
+      "line_end": 4,
       "severity": "medium",
       "category": "test",
       "message": "Removing the removeFromCart tests leaves the not-found error path and normal removal completely uncovered.",
