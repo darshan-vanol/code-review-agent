@@ -54,3 +54,19 @@ an overall score. When disabled, spans are still returned inline in the
 uv run pytest -q
 uv run ruff check .
 ```
+
+## CI & Evaluation
+
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` and every PR:
+
+1. **test** — ruff + pytest with the mock provider (no keys, fully offline).
+2. **eval** — runs the RAGAS harness (`python -m evals.run_eval`) with a Groq
+   judge. It **fails the build if faithfulness or answer correctness < 0.75**,
+   uploads the report as an artifact, and comments the score table on the PR.
+
+Set repository secret `GROQ_API_KEY` for the eval job. Run it locally with:
+
+```bash
+export LLM_PROVIDER=groq GROQ_API_KEY=...
+uv run python -m evals.run_eval --provider groq
+```

@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: Lint + unit tests (offline)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Set up Python
+        run: uv python install 3.11
+      - name: Install dependencies
+        run: uv pip install --system -e ".[dev]"
+      - name: Ruff
+        run: uv run ruff check .
+      - name: Pytest (mock provider, no keys)
+        env:
+          LLM_PROVIDER: mock
+        run: uv run pytest -q
+
+  eval:
+    name: RAGAS eval gate
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Set up Python
+        run: uv python install 3.11
+      - name: Install dependencies
+        run: uv pip install --system -e ".[dev]"
+      - name: Run eval (fails build if faithfulness or correctness < 0.75)
+        env:
+          LLM_PROVIDER: groq
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: uv run python -m evals.run_eval --out-dir evals/reports --provider groq
+      - name: Upload eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: evals/reports/
+      - name: Comment scores on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const dir = 'evals/reports';
+            const md = fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort();
+            if (md.length === 0) return;
+            const body = fs.readFileSync(path.join(dir, md[md.length - 1]), 'utf8');
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
