@@ -18,7 +18,7 @@ const finding = (over: Partial<Finding> = {}): Finding => ({
 it("groups findings by file and renders badge + location + message", () => {
   render(
     <FindingsList
-      findings={[finding(), finding({ file: "b.py", category: "logic", severity: "low" })]}
+      findings={[finding(), finding({ file: "b.py", category: "logic", severity: "low", message: "another issue" })]}
     />,
   );
   expect(screen.getByText("a.py:1-2")).toBeInTheDocument();
