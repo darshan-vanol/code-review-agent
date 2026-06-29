@@ -70,3 +70,26 @@ Set repository secret `GROQ_API_KEY` for the eval job. Run it locally with:
 export LLM_PROVIDER=groq GROQ_API_KEY=...
 uv run python -m evals.run_eval --provider groq
 ```
+
+## Dashboard (web/)
+
+A Vite + React + TS dashboard with two views:
+
+- **Review Playground** — paste a diff or a GitHub PR URL, get annotated findings,
+  an overall score gauge, and a per-node span table.
+- **Eval Analytics** — RAGAS score trends across runs and a per-PR drill-down,
+  gated visually at the 0.75 threshold.
+
+```bash
+# 1. Run the API populated with a real model (the mock returns empty findings):
+export LLM_PROVIDER=groq GROQ_API_KEY=...   # or gemini / GEMINI_API_KEY
+uv run uvicorn api.main:app
+
+# 2. In another shell, run the dashboard dev server (proxies to the API on :8000):
+cd web && npm install && npm run dev   # http://localhost:5173
+```
+
+The dashboard reads eval reports from the API (`GET /eval/reports`), which serves
+the JSON written by `python -m evals.run_eval`. Set `VITE_LANGFUSE_URL` to show an
+"Open in Langfuse" link in the analytics view. Run the frontend tests with
+`cd web && npm test`.

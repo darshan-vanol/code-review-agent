@@ -1391,6 +1391,11 @@ git commit -m "feat: dashboard app shell, styling, and README"
 - **Spec §8 Testing** — frontend Vitest/RTL with stubbed fetch / mocked api (Tasks 2–5); backend pytest (Task 1). TrendChart's non-test is explained inline (Recharts + jsdom).
 - **Spec §9 Out of scope** — no streaming, no auth, `web/` not in CI, no per-item trace IDs. Honored.
 
+### Post-implementation deviations (adjudicated at final review, 2026-06-29)
+- **Finding grouping (§5):** spec said "grouped by file, then category"; shipped behavior groups by file only and shows category as a per-finding inline tag. **Accepted** as a demo-scope simplification (cleaner read for typical small diffs) — sub-grouping not implemented.
+- **Report selection (§6):** spec said "for a selected report." The initial plan code pinned the table to the latest report; a **report picker was added** in the final-fix pass (`<select aria-label="select report">`, shown when >1 report) so any past report can be inspected. Spec §6 honored.
+- **Robustness:** `api/reports.py` hardened to skip malformed report JSON (list) / return 404 (detail) instead of 500, honoring the §3 "never 500" intent.
+
 ## Done criteria
 
 - `uv run pytest -q` green (incl. new `tests/test_eval_endpoints.py`); `uv run ruff check .` clean.
