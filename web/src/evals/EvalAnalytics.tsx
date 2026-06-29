@@ -1,0 +1,44 @@
+import { useEffect, useState } from "react";
+
+import { type EvalReport, type EvalReportSummary, getReport, getReports } from "../api";
+import { EmptyState } from "../components/EmptyState";
+import { ReportTable } from "./ReportTable";
+import { TrendChart } from "./TrendChart";
+
+const LANGFUSE_URL = import.meta.env.VITE_LANGFUSE_URL as string | undefined;
+
+export function EvalAnalytics() {
+  const [reports, setReports] = useState<EvalReportSummary[]>([]);
+  const [selected, setSelected] = useState<EvalReport | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    getReports()
+      .then(async (rs) => {
+        setReports(rs);
+        if (rs.length > 0) {
+          setSelected(await getReport(rs[rs.length - 1].id));
+        }
+      })
+      .catch(() => {
+        /* leave empty; the empty state covers it */
+      })
+      .finally(() => setLoaded(true));
+  }, []);
+
+  if (loaded && reports.length === 0) {
+    return <EmptyState message="No eval runs yet — run `python -m evals.run_eval`." />;
+  }
+
+  return (
+    <div className="analytics">
+      {LANGFUSE_URL && (
+        <a className="langfuse-link" href={LANGFUSE_URL} target="_blank" rel="noreferrer">
+          Open in Langfuse ↗
+        </a>
+      )}
+      <TrendChart reports={reports} />
+      {selected && <ReportTable report={selected} />}
+    </div>
+  );
+}
