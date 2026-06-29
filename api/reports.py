@@ -15,13 +15,26 @@ def _sort_key(path: Path) -> tuple[int, object]:
     return (0, int(path.stem)) if path.stem.isdigit() else (1, path.stem)
 
 
+def _parse_report(path: Path) -> dict | None:
+    """Return the parsed JSON dict, or None if the file is malformed / missing expected keys."""
+    try:
+        data = json.loads(path.read_text())
+        if "passed" not in data or "aggregate" not in data:
+            return None
+        return data
+    except json.JSONDecodeError:
+        return None
+
+
 def list_reports(directory: Path | None = None) -> list[dict]:
     directory = directory or reports_dir()
     if not directory.exists():
         return []
     summaries: list[dict] = []
     for path in sorted(directory.glob("*.json"), key=_sort_key):
-        data = json.loads(path.read_text())
+        data = _parse_report(path)
+        if data is None:
+            continue
         summaries.append(
             {"id": path.stem, "passed": data["passed"], "aggregate": data["aggregate"]}
         )
@@ -33,4 +46,4 @@ def get_report(report_id: str, directory: Path | None = None) -> dict | None:
     path = directory / f"{report_id}.json"
     if not path.exists():
         return None
-    return json.loads(path.read_text())
+    return _parse_report(path)

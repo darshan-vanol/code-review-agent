@@ -53,3 +53,20 @@ def test_get_report_unknown_is_404(tmp_path, monkeypatch):
 def test_cors_header_present_for_web_origin():
     r = client.get("/health", headers={"Origin": "http://localhost:5173"})
     assert r.headers.get("access-control-allow-origin") == "http://localhost:5173"
+
+
+def test_list_reports_skips_malformed_file(tmp_path, monkeypatch):
+    _seed(tmp_path, monkeypatch, n=1)
+    (tmp_path / "2.json").write_text("{ not valid json")
+    r = client.get("/eval/reports")
+    assert r.status_code == 200
+    body = r.json()
+    assert len(body) == 1
+    assert body[0]["id"] == "1"
+
+
+def test_get_report_malformed_is_not_500(tmp_path, monkeypatch):
+    monkeypatch.setenv("EVAL_REPORTS_DIR", str(tmp_path))
+    (tmp_path / "1.json").write_text("{ not valid json")
+    r = client.get("/eval/reports/1")
+    assert r.status_code == 404

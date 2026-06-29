@@ -37,3 +37,4 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .report-table tr[data-status="pass"] td:first-child { color: var(--pass); }
 .report-table tr[data-status="fail"] td:first-child { color: var(--fail); }
 .langfuse-link { color: var(--accent); }
+.report-picker { background: var(--panel); color: var(--text); border: 1px solid #2a3442; border-radius: 6px; padding: .3rem .6rem; margin-bottom: .75rem; cursor: pointer; }
