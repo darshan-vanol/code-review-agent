@@ -3,14 +3,24 @@ from __future__ import annotations
 import os
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from agent.graph import run_review
 from agent.observability import make_tracer
 from agent.providers.factory import make_provider
 from api.github import GitHubError, fetch_pull_request
-from api.schemas import ReviewRequest, ReviewResponse
+from api.reports import get_report, list_reports
+from api.schemas import EvalReportSummary, ReviewRequest, ReviewResponse
 
 app = FastAPI(title="Code Review Assistant", version="0.1.0")
+
+_web_origins = os.environ.get("WEB_ORIGIN", "http://localhost:5173").split(",")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[o.strip() for o in _web_origins],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def _strip_diff_headers(text: str) -> str:
@@ -34,6 +44,19 @@ def version() -> dict:
         "langfuse_enabled": os.environ.get("LANGFUSE_ENABLED", "").lower()
         in {"1", "true", "yes"},
     }
+
+
+@app.get("/eval/reports", response_model=list[EvalReportSummary])
+def eval_reports() -> list[dict]:
+    return list_reports()
+
+
+@app.get("/eval/reports/{report_id}")
+def eval_report(report_id: str) -> dict:
+    report = get_report(report_id)
+    if report is None:
+        raise HTTPException(status_code=404, detail=f"No eval report '{report_id}'")
+    return report
 
 
 @app.post("/review", response_model=ReviewResponse)

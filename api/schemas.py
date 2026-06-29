@@ -26,3 +26,9 @@ class ReviewResponse(BaseModel):
     token_usage: dict[str, float]
     spans: list[SpanRecord]
     errors: list[str]
+
+
+class EvalReportSummary(BaseModel):
+    id: str
+    passed: bool
+    aggregate: dict[str, float]
