@@ -16,8 +16,10 @@ def run(out_dir: Path, *, provider=None, scorer=None, goldens=None,
     """Build records, score them, write reports, return 0 (pass) or 1 (fail)."""
     provider = provider if provider is not None else make_provider()
     if scorer is None:
-        from evals.ragas_scorer import score_with_ragas
-        scorer = score_with_ragas
+        from evals.detection_scorer import default_rescue, score_by_detection
+
+        rescue = default_rescue()
+        scorer = lambda records: score_by_detection(records, rescue=rescue)  # noqa: E731
     goldens = goldens if goldens is not None else load_golden()
 
     records = build_records(goldens, provider)
