@@ -17,6 +17,8 @@ class EvalRecord(BaseModel):
     response: str
     retrieved_contexts: list[str]
     reference: str
+    agent_findings: list[dict]
+    golden_findings: list[dict]
 
 
 def _finding_field(finding, name: str):
@@ -25,6 +27,15 @@ def _finding_field(finding, name: str):
         return finding[name]
     value = getattr(finding, name)
     return getattr(value, "value", value)  # unwrap enums like Severity
+
+
+_FINDING_KEYS = ("file", "line_start", "line_end", "severity", "category", "message")
+
+
+def normalize_finding(finding) -> dict:
+    """Flatten a finding (agent Pydantic model or golden dict) to a plain dict
+    with the fields the detection scorer matches on."""
+    return {key: _finding_field(finding, key) for key in _FINDING_KEYS}
 
 
 def serialize_findings(findings: list) -> str:
@@ -57,6 +68,8 @@ def build_records(goldens: list[GoldenPR], provider) -> list[EvalRecord]:
                 response=serialize_findings(agent_findings),
                 retrieved_contexts=[g.diff],
                 reference=reference,
+                agent_findings=[normalize_finding(f) for f in agent_findings],
+                golden_findings=[normalize_finding(f) for f in g.findings],
             )
         )
     return records
