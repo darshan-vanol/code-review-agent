@@ -1,6 +1,8 @@
 from evals.detection_scorer import (
     PRECISION_PENALTY,
+    default_rescue,
     finding_matches,
+    make_groq_rescue,
     score_by_detection,
     score_record,
 )
@@ -75,3 +77,52 @@ def test_score_by_detection_maps_all_records():
     out = score_by_detection(recs)
     assert [o["id"] for o in out] == ["a", "b"]
     assert out[0]["score"] == 1.0 and out[1]["score"] == 0.0
+
+
+class _StubProvider:
+    def __init__(self, text):
+        self._text = text
+
+    def complete(self, system, user):
+        class _R:  # minimal LLMResponse stand-in
+            pass
+        r = _R()
+        r.text = self._text
+        return r
+
+
+def test_rescue_rescues_line_drifted_finding():
+    # deterministic miss (lines off by 2), rescued by the LLM saying yes
+    rec = _Rec("x", [_f(ls=8, le=8)], [_f(ls=5, le=6)])
+    rescue = make_groq_rescue(_StubProvider('{"match": true}'))
+    out = score_record(rec, rescue=rescue)
+    assert out["recall"] == 1.0
+
+
+def test_rescue_no_when_llm_says_no():
+    rec = _Rec("x", [_f(ls=8, le=8)], [_f(ls=5, le=6)])
+    rescue = make_groq_rescue(_StubProvider('{"match": false}'))
+    out = score_record(rec, rescue=rescue)
+    assert out["recall"] == 0.0
+
+
+def test_rescue_failsafe_on_unparseable_response():
+    rec = _Rec("x", [_f(ls=8, le=8)], [_f(ls=5, le=6)])
+    rescue = make_groq_rescue(_StubProvider("not json at all"))
+    out = score_record(rec, rescue=rescue)
+    assert out["recall"] == 0.0  # treated as no match, no crash
+
+
+def test_rescue_failsafe_on_provider_error():
+    class _Boom:
+        def complete(self, system, user):
+            raise RuntimeError("429 rate limit")
+
+    rec = _Rec("x", [_f(ls=8, le=8)], [_f(ls=5, le=6)])
+    out = score_record(rec, rescue=make_groq_rescue(_Boom()))
+    assert out["recall"] == 0.0
+
+
+def test_default_rescue_disabled_by_env(monkeypatch):
+    monkeypatch.setenv("EVAL_LLM_FALLBACK", "0")
+    assert default_rescue() is None
