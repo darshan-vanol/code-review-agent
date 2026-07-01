@@ -41,9 +41,14 @@ def health() -> dict[str, str]:
 
 @app.get("/version")
 def version() -> dict:
+    provider = os.environ.get("LLM_PROVIDER", "mock").lower()
     return {
         "version": app.version,
-        "provider": os.environ.get("LLM_PROVIDER", "mock").lower(),
+        "provider": provider,
+        # The configured model for the active provider. Instantiating the
+        # provider only reads env/config (no network call), so this is safe to
+        # resolve here and lets the UI show the model before any review runs.
+        "model": make_provider(provider).model,
         "langfuse_enabled": os.environ.get("LANGFUSE_ENABLED", "").lower()
         in {"1", "true", "yes"},
     }

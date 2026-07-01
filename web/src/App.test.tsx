@@ -6,6 +6,7 @@ import { App } from "./App";
 
 vi.mock("./playground/Playground", () => ({ Playground: () => <div>PLAYGROUND</div> }));
 vi.mock("./evals/EvalAnalytics", () => ({ EvalAnalytics: () => <div>ANALYTICS</div> }));
+vi.mock("./components/ProviderBadge", () => ({ ProviderBadge: () => <div>BADGE</div> }));
 
 it("shows the playground by default and switches to analytics", async () => {
   render(<App />);

@@ -145,6 +145,20 @@ export async function postReviewStream(
   return result;
 }
 
+export interface VersionInfo {
+  version: string;
+  provider: string;
+  model: string;
+  langfuse_enabled: boolean;
+}
+
+// The provider/model the API is configured to run reviews with. Fetched once on
+// load so the UI can show what's doing the review before any run starts.
+export async function getVersion(): Promise<VersionInfo> {
+  const res = await fetch(`${BASE}/version`);
+  return asJson<VersionInfo>(res);
+}
+
 export async function getReports(): Promise<EvalReportSummary[]> {
   const res = await fetch(`${BASE}/eval/reports`);
   return asJson<EvalReportSummary[]>(res);

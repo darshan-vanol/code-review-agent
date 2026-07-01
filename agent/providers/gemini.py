@@ -25,6 +25,10 @@ class GeminiProvider:
         self._model = model
         self._client = client or httpx.Client(timeout=_TIMEOUT_S)
 
+    @property
+    def model(self) -> str:
+        return self._model
+
     def complete(self, system: str, user: str) -> LLMResponse:
         start = time.perf_counter()
         url = f"{_BASE}/{self._model}:generateContent?key={self._api_key}"

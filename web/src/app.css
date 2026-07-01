@@ -62,6 +62,29 @@ body { margin: 0; background: var(--bg); color: var(--text); -webkit-font-smooth
 .tabs button:hover, .mode-toggle button:hover { color: var(--text); }
 .tabs button[aria-current="true"],
 .mode-toggle button[aria-selected="true"] { background: var(--surface-2); color: var(--text); }
+/* Provider/model indicator, pinned to the right of the header. */
+.provider-badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.provider-badge-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--faint);
+}
+.provider-badge-provider { color: var(--accent); font-weight: 600; }
+.provider-badge-sep { color: var(--faint); }
+.provider-badge-model { color: var(--muted); font-family: var(--mono); }
+
 .app-main { padding: 1.75rem; max-width: 1000px; margin: 0 auto; }
 
 :where(button, select, a):focus-visible {

@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import "./app.css";
+import { ProviderBadge } from "./components/ProviderBadge";
 import { EvalAnalytics } from "./evals/EvalAnalytics";
 import { Playground } from "./playground/Playground";
 
@@ -23,6 +24,7 @@ export function App() {
             Eval Analytics
           </button>
         </nav>
+        <ProviderBadge />
       </header>
       <main className="app-main">
         {tab === "playground" ? <Playground /> : <EvalAnalytics />}

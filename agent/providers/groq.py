@@ -53,6 +53,10 @@ class GroqProvider:
         self._max_retries = max_retries
         self._sleep = sleep
 
+    @property
+    def model(self) -> str:
+        return self._model
+
     def _retry_wait(self, resp: httpx.Response, attempt: int) -> float:
         """How long to wait before the next attempt: prefer the server's own
         hint, else exponential backoff. Capped so a stale header can't stall us."""

@@ -19,11 +19,23 @@ def test_health_ok():
     assert r.json()["status"] == "ok"
 
 
-def test_version_reports_provider(monkeypatch):
+def test_version_reports_provider_and_model(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "mock")
     r = client.get("/version")
     assert r.status_code == 200
-    assert r.json()["provider"] == "mock"
+    body = r.json()
+    assert body["provider"] == "mock"
+    assert body["model"] == "mock-1"
+
+
+def test_version_reports_configured_groq_model(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "groq")
+    monkeypatch.setenv("GROQ_MODEL", "llama-3.1-8b-instant")
+    r = client.get("/version")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["provider"] == "groq"
+    assert body["model"] == "llama-3.1-8b-instant"
 
 
 def test_review_with_raw_diff_returns_findings_score_and_spans():

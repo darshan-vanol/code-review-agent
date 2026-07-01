@@ -18,5 +18,11 @@ class LLMProvider(Protocol):
     """Abstracts a chat-completion model. Implementations must be swappable
     behind this interface (mock, Groq, Gemini, OpenAI, Anthropic)."""
 
+    @property
+    def model(self) -> str:
+        """The model name this provider is configured to call. Exposed so the
+        API/UI can show it before any completion runs."""
+        ...
+
     def complete(self, system: str, user: str) -> LLMResponse:
         ...

@@ -25,6 +25,10 @@ class MockProvider:
     def __init__(self, scripted: dict[str, list[dict]] | None = None):
         self._scripted = scripted or {}
 
+    @property
+    def model(self) -> str:
+        return _MODEL_NAME
+
     def complete(self, system: str, user: str) -> LLMResponse:
         findings: list[dict] = []
         for keyword, value in self._scripted.items():
