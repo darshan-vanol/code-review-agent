@@ -5,28 +5,24 @@ export function MetricGuide({ threshold }: { threshold: number }) {
     <section className="guide" aria-label="what these scores mean">
       <div className="guide-card">
         <span className="eyebrow">Metric</span>
-        <h3>Faithfulness</h3>
+        <h3>Score</h3>
         <p>
-          Are the review's claims grounded in the actual diff? A high score means the
-          agent flags issues that are really in the code — not hallucinated ones.
+          Did the agent catch the known bug in each diff, with a small penalty for
+          noisy extra findings? This is the number the pass bar gates on.
         </p>
       </div>
       <div className="guide-card">
         <span className="eyebrow">Metric</span>
-        <h3>Answer correctness</h3>
+        <h3>Recall</h3>
         <p>
-          How closely the findings match the golden review for each diff — the right
-          issues, described accurately, without missing the important ones.
+          The share of the golden findings the agent detected — how many real issues
+          it caught, ignoring any extra noise.
         </p>
       </div>
       <p className="guide-note">
         <span>
-          <b>Pass bar {threshold.toFixed(2)}</b> — an item passes only when both metrics
-          reach the bar; the run passes only when both averages do.
-        </span>
-        <span>
-          <b>n/a</b> — the judge couldn't score the item (usually a truncated or empty
-          response). It counts as not passing.
+          <b>Pass bar {threshold.toFixed(2)}</b> — an item passes when its score
+          reaches the bar; the run passes when the average score does.
         </span>
       </p>
     </section>

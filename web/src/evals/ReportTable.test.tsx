@@ -5,31 +5,28 @@ import type { EvalReport } from "../api";
 import { ReportTable } from "./ReportTable";
 
 const report: EvalReport = {
-  aggregate: { faithfulness: 0.8, answer_correctness: 0.8 },
+  aggregate: { score: 0.8, recall: 0.9 },
   threshold: 0.75,
   passed: true,
   items: [
-    { id: "ok", faithfulness: 0.75, answer_correctness: 0.9 },
-    { id: "bad", faithfulness: 0.74, answer_correctness: 0.9 },
+    { id: "ok", score: 0.75, recall: 1.0 },
+    { id: "bad", score: 0.74, recall: 1.0 },
   ],
 };
 
-it("marks rows pass/fail at the 0.75 boundary", () => {
+it("marks rows pass/fail at the threshold on score", () => {
   render(<ReportTable report={report} />);
   expect(screen.getByText("ok").closest("tr")).toHaveAttribute("data-status", "pass");
   expect(screen.getByText("bad").closest("tr")).toHaveAttribute("data-status", "fail");
 });
 
-it("renders a null score as n/a and marks the row failed", () => {
-  // A truncated judge response yields null (not a number) for a metric; the
-  // table must render it without crashing on toFixed.
-  const withNull: EvalReport = {
-    aggregate: { faithfulness: 0.5, answer_correctness: 0.5 },
+it("passes a row on score even when recall is low", () => {
+  const r: EvalReport = {
+    aggregate: { score: 0.8, recall: 0.5 },
     threshold: 0.75,
-    passed: false,
-    items: [{ id: "trunc", faithfulness: 0.9, answer_correctness: null }],
+    passed: true,
+    items: [{ id: "hi", score: 0.9, recall: 0.2 }],
   };
-  render(<ReportTable report={withNull} />);
-  expect(screen.getByText("n/a")).toBeInTheDocument();
-  expect(screen.getByText("trunc").closest("tr")).toHaveAttribute("data-status", "fail");
+  render(<ReportTable report={r} />);
+  expect(screen.getByText("hi").closest("tr")).toHaveAttribute("data-status", "pass");
 });

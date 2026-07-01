@@ -12,14 +12,14 @@ import {
 
 import type { EvalReportSummary } from "../api";
 
-const FAITHFULNESS = "#5b8cff";
-const CORRECTNESS = "#35c08a";
+const SCORE = "#5b8cff";
+const RECALL = "#35c08a";
 
 export function TrendChart({ reports }: { reports: EvalReportSummary[] }) {
   const data = reports.map((r) => ({
     id: `run ${r.id}`,
-    Faithfulness: r.aggregate.faithfulness,
-    "Answer correctness": r.aggregate.answer_correctness,
+    Score: r.aggregate.score,
+    Recall: r.aggregate.recall,
   }));
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -43,14 +43,8 @@ export function TrendChart({ reports }: { reports: EvalReportSummary[] }) {
           strokeDasharray="4 4"
           label={{ value: "pass bar 0.75", position: "insideTopRight", fill: "#e0a63c", fontSize: 11 }}
         />
-        <Line type="monotone" dataKey="Faithfulness" stroke={FAITHFULNESS} strokeWidth={2} dot={{ r: 4 }} />
-        <Line
-          type="monotone"
-          dataKey="Answer correctness"
-          stroke={CORRECTNESS}
-          strokeWidth={2}
-          dot={{ r: 4 }}
-        />
+        <Line type="monotone" dataKey="Score" stroke={SCORE} strokeWidth={2} dot={{ r: 4 }} />
+        <Line type="monotone" dataKey="Recall" stroke={RECALL} strokeWidth={2} dot={{ r: 4 }} />
       </LineChart>
     </ResponsiveContainer>
   );

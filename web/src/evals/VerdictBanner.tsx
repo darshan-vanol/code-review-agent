@@ -33,13 +33,7 @@ export function VerdictBanner({
   report: EvalReport;
   controls?: React.ReactNode;
 }) {
-  const cleared = report.items.filter(
-    (it) =>
-      it.faithfulness !== null &&
-      it.faithfulness >= report.threshold &&
-      it.answer_correctness !== null &&
-      it.answer_correctness >= report.threshold,
-  ).length;
+  const cleared = report.items.filter((it) => it.score >= report.threshold).length;
   const total = report.items.length;
 
   return (
@@ -62,13 +56,13 @@ export function VerdictBanner({
 
       <div className="verdict-metrics">
         <VerdictMetric
-          name="Faithfulness"
-          value={report.aggregate.faithfulness}
+          name="Score"
+          value={report.aggregate.score}
           threshold={report.threshold}
         />
         <VerdictMetric
-          name="Answer correctness"
-          value={report.aggregate.answer_correctness}
+          name="Recall"
+          value={report.aggregate.recall}
           threshold={report.threshold}
         />
       </div>
