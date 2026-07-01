@@ -46,6 +46,12 @@ def build_graph(provider: LLMProvider, tracer=None):
     return g.compile()
 
 
+def _final_state(state_dict: dict) -> ReviewState:
+    return ReviewState(
+        **{k: v for k, v in state_dict.items() if k in ReviewState.model_fields}
+    )
+
+
 def run_review(diff: str, provider: LLMProvider, tracer=None) -> ReviewState:
     """Run the full review graph over a unified diff and return the final state.
 
@@ -53,8 +59,25 @@ def run_review(diff: str, provider: LLMProvider, tracer=None) -> ReviewState:
     tracer = tracer or NoOpTracer()
     compiled = build_graph(provider, tracer)
     result = compiled.invoke(ReviewState(raw_diff=diff))
-    final = ReviewState(
-        **{k: v for k, v in dict(result).items() if k in ReviewState.model_fields}
-    )
+    final = _final_state(dict(result))
     tracer.finish(score=final.score.overall if final.score else None)
     return final
+
+
+def stream_review(diff: str, provider: LLMProvider, tracer=None):
+    """Run the review graph and yield progress as each node finishes.
+
+    Yields ("progress", node_name) after every graph node completes, then a final
+    ("result", ReviewState). Because each node returns the whole state, the last
+    streamed update is the complete final state."""
+    tracer = tracer or NoOpTracer()
+    compiled = build_graph(provider, tracer)
+    final_dict: dict = {}
+    for chunk in compiled.stream(ReviewState(raw_diff=diff), stream_mode="updates"):
+        for node_name, state_dict in chunk.items():
+            if state_dict:
+                final_dict = state_dict
+            yield ("progress", node_name)
+    final = _final_state(final_dict)
+    tracer.finish(score=final.score.overall if final.score else None)
+    yield ("result", final)

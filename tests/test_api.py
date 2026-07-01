@@ -39,6 +39,54 @@ def test_review_with_raw_diff_returns_findings_score_and_spans():
     assert "input_tokens" in body["token_usage"]
 
 
+def _read_ndjson(resp):
+    import json
+
+    return [json.loads(line) for line in resp.text.splitlines() if line.strip()]
+
+
+def test_review_stream_emits_progress_per_stage_then_result():
+    r = client.post("/review/stream", json={"diff": _DIFF})
+    assert r.status_code == 200
+    events = _read_ndjson(r)
+    stages = [e["stage"] for e in events if e["type"] == "progress"]
+    assert stages == ["ingest", "security", "logic", "test_coverage", "aggregate"]
+    result = [e for e in events if e["type"] == "result"]
+    assert len(result) == 1
+    body = result[0]["data"]
+    assert body["is_trivial"] is False
+    assert "overall" in body["score"]
+    assert [s["name"] for s in body["spans"]] == [
+        "ingest", "security", "logic", "test_coverage", "aggregate"
+    ]
+
+
+def test_review_stream_pr_url_emits_fetch_stage(monkeypatch):
+    def fake_fetch(url, token=None):
+        return PullRequest(title="T", body="B", diff=_DIFF)
+
+    monkeypatch.setattr(main, "fetch_pull_request", fake_fetch)
+    r = client.post("/review/stream", json={"pr_url": "https://github.com/o/r/pull/1"})
+    assert r.status_code == 200
+    events = _read_ndjson(r)
+    assert [e for e in events if e["type"] == "progress"][0]["stage"] == "fetch"
+    assert any(e["type"] == "result" for e in events)
+
+
+def test_review_stream_github_failure_emits_error_event(monkeypatch):
+    from api.github import GitHubError
+
+    def boom(url, token=None):
+        raise GitHubError("GitHub diff fetch failed (404)")
+
+    monkeypatch.setattr(main, "fetch_pull_request", boom)
+    r = client.post("/review/stream", json={"pr_url": "https://github.com/o/r/pull/1"})
+    assert r.status_code == 200  # stream started; failure is reported inline
+    events = _read_ndjson(r)
+    assert events[-1]["type"] == "error"
+    assert "404" in events[-1]["detail"]
+
+
 def test_review_requires_exactly_one_of_diff_or_pr_url():
     assert client.post("/review", json={}).status_code == 422
     assert client.post(

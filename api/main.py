@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import json
 import os
+from collections.abc import Iterator
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
-from agent.graph import run_review
+from agent.graph import run_review, stream_review
 from agent.observability import make_tracer
 from agent.providers.factory import make_provider
 from api.github import GitHubError, fetch_pull_request
@@ -59,25 +62,22 @@ def eval_report(report_id: str) -> dict:
     return report
 
 
-@app.post("/review", response_model=ReviewResponse)
-def review(req: ReviewRequest) -> ReviewResponse:
-    if req.pr_url:
-        try:
-            pr = fetch_pull_request(req.pr_url, token=os.environ.get("GITHUB_TOKEN"))
-        except ValueError as e:
-            raise HTTPException(status_code=422, detail=str(e)) from e
-        except GitHubError as e:
-            raise HTTPException(status_code=502, detail=str(e)) from e
-        # Prepend PR title/body as context. The diff parser starts a file on any
-        # `diff --git` line, so strip such lines from the prose first to avoid a
-        # PR description injecting a phantom file into the parse.
-        context = _strip_diff_headers(f"PR: {pr.title}\n\n{pr.body}")
-        diff = f"{context}\n\n{pr.diff}"
-    else:
-        diff = req.diff or ""
+def _resolve_diff(req: ReviewRequest) -> str:
+    """Turn a request into the unified diff to review, fetching the PR if needed.
 
-    tracer = make_tracer()
-    result = run_review(diff, make_provider(), tracer)
+    Raises ValueError for a bad PR URL and GitHubError for a fetch failure; callers
+    translate those into HTTP status codes or stream error events."""
+    if not req.pr_url:
+        return req.diff or ""
+    pr = fetch_pull_request(req.pr_url, token=os.environ.get("GITHUB_TOKEN"))
+    # Prepend PR title/body as context. The diff parser starts a file on any
+    # `diff --git` line, so strip such lines from the prose first to avoid a
+    # PR description injecting a phantom file into the parse.
+    context = _strip_diff_headers(f"PR: {pr.title}\n\n{pr.body}")
+    return f"{context}\n\n{pr.diff}"
+
+
+def _build_response(result, spans) -> ReviewResponse:
     return ReviewResponse(
         is_trivial=result.is_trivial,
         score=result.score,
@@ -85,6 +85,55 @@ def review(req: ReviewRequest) -> ReviewResponse:
         logic_findings=result.logic_findings,
         test_suggestions=result.test_suggestions,
         token_usage=result.token_usage,
-        spans=tracer.spans,
+        spans=spans,
         errors=result.errors,
     )
+
+
+@app.post("/review", response_model=ReviewResponse)
+def review(req: ReviewRequest) -> ReviewResponse:
+    try:
+        diff = _resolve_diff(req)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+    except GitHubError as e:
+        raise HTTPException(status_code=502, detail=str(e)) from e
+
+    tracer = make_tracer()
+    result = run_review(diff, make_provider(), tracer)
+    return _build_response(result, tracer.spans)
+
+
+@app.post("/review/stream")
+def review_stream(req: ReviewRequest) -> StreamingResponse:
+    """Same review as POST /review, but streams newline-delimited JSON progress
+    events as each stage finishes, then a final result. One JSON object per line:
+      {"type": "progress", "stage": "<fetch|ingest|security|logic|test_coverage|aggregate>"}
+      {"type": "result", "data": { ...ReviewResponse... }}
+      {"type": "error", "detail": "..."}
+    """
+
+    def emit(obj: dict) -> str:
+        return json.dumps(obj) + "\n"
+
+    def generate() -> Iterator[str]:
+        try:
+            diff = _resolve_diff(req)
+        except (ValueError, GitHubError) as e:
+            yield emit({"type": "error", "detail": str(e)})
+            return
+        if req.pr_url:
+            yield emit({"type": "progress", "stage": "fetch"})
+
+        tracer = make_tracer()
+        try:
+            for kind, payload in stream_review(diff, make_provider(), tracer):
+                if kind == "progress":
+                    yield emit({"type": "progress", "stage": payload})
+                else:
+                    resp = _build_response(payload, tracer.spans)
+                    yield emit({"type": "result", "data": resp.model_dump()})
+        except Exception as e:  # noqa: BLE001 - report mid-stream, not as a 500
+            yield emit({"type": "error", "detail": str(e)})
+
+    return StreamingResponse(generate(), media_type="application/x-ndjson")

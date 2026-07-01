@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 
 import { type EvalReport, type EvalReportSummary, getReport, getReports } from "../api";
 import { EmptyState } from "../components/EmptyState";
+import { MetricGuide } from "./MetricGuide";
 import { ReportTable } from "./ReportTable";
 import { TrendChart } from "./TrendChart";
+import { VerdictBanner } from "./VerdictBanner";
 
 const LANGFUSE_URL = import.meta.env.VITE_LANGFUSE_URL as string | undefined;
 
@@ -40,13 +42,8 @@ export function EvalAnalytics() {
     return <EmptyState message="No eval runs yet — run `python -m evals.run_eval`." />;
   }
 
-  return (
-    <div className="analytics">
-      {LANGFUSE_URL && (
-        <a className="langfuse-link" href={LANGFUSE_URL} target="_blank" rel="noreferrer">
-          Open in Langfuse ↗
-        </a>
-      )}
+  const controls = (
+    <>
       {reports.length > 1 && (
         <select
           aria-label="select report"
@@ -56,13 +53,45 @@ export function EvalAnalytics() {
         >
           {reports.map((r) => (
             <option key={r.id} value={r.id}>
-              {r.id} {r.passed ? "✓" : "✗"}
+              run {r.id} · {r.passed ? "passed" : "failed"}
             </option>
           ))}
         </select>
       )}
-      <TrendChart reports={reports} />
-      {selected && <ReportTable report={selected} />}
+      {LANGFUSE_URL && (
+        <a className="langfuse-link" href={LANGFUSE_URL} target="_blank" rel="noreferrer">
+          Traces in Langfuse ↗
+        </a>
+      )}
+    </>
+  );
+
+  return (
+    <div className="eval">
+      {selected && <VerdictBanner report={selected} controls={controls} />}
+      {selected && <MetricGuide threshold={selected.threshold} />}
+      {selected && (
+        <section>
+          <div className="section-head">
+            <h2>Per-diff scores</h2>
+            <span className="hint">
+              bar marks the {selected.threshold.toFixed(2)} pass threshold
+            </span>
+          </div>
+          <ReportTable report={selected} />
+        </section>
+      )}
+      <section>
+        <div className="section-head">
+          <h2>Score history</h2>
+          <span className="hint">
+            {reports.length > 1 ? `${reports.length} runs` : "one run so far"}
+          </span>
+        </div>
+        <div className="trend-card">
+          <TrendChart reports={reports} />
+        </div>
+      </section>
     </div>
   );
 }
