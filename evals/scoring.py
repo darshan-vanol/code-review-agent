@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 THRESHOLD = 0.75
-_METRICS = ("faithfulness", "answer_correctness")
+_METRICS = ("score", "recall")
 
 
 def aggregate_scores(per_item: list[dict]) -> dict[str, float]:
-    # A metric may be None for an item when the judge response was truncated /
-    # failed to score; average over the items that did score (0.0 if none did).
     agg: dict[str, float] = {}
     for m in _METRICS:
         values = [item[m] for item in per_item if item.get(m) is not None]
@@ -19,7 +17,8 @@ def _fmt(value: float | None) -> str:
 
 
 def passes_threshold(scores: dict[str, float], threshold: float = THRESHOLD) -> bool:
-    return all(scores[m] >= threshold for m in _METRICS)
+    # Gate on detection score only; recall is reported but not gated.
+    return scores["score"] >= threshold
 
 
 def render_report(
@@ -37,15 +36,15 @@ def render_report(
         f"# Eval Report — {status}",
         "",
         f"- Threshold: {threshold}",
-        f"- Faithfulness: {_fmt(scores['faithfulness'])}",
-        f"- Answer correctness: {_fmt(scores['answer_correctness'])}",
+        f"- Score: {_fmt(scores['score'])}",
+        f"- Recall: {_fmt(scores['recall'])}",
         "",
-        "| id | faithfulness | answer_correctness |",
+        "| id | score | recall |",
         "| --- | --- | --- |",
     ]
     for item in per_item:
         lines.append(
-            f"| {item['id']} | {_fmt(item.get('faithfulness'))} "
-            f"| {_fmt(item.get('answer_correctness'))} |"
+            f"| {item['id']} | {_fmt(item.get('score'))} "
+            f"| {_fmt(item.get('recall'))} |"
         )
     return report, "\n".join(lines)
