@@ -45,3 +45,22 @@ def test_build_records_shapes_one_record_per_golden():
     assert r.retrieved_contexts == [_DIFF]
     assert "expected verdict" in r.reference
     assert "issue" in r.reference
+
+
+def test_build_records_carries_structured_findings():
+    golden = GoldenPR(
+        id="g1", language="python", category="security", diff=_DIFF,
+        summary="expected verdict", findings=[_EXPECTED_FINDING],
+    )
+    provider = MockProvider(scripted={"security": _SCRIPTED})
+    r = build_records([golden], provider)[0]
+    # golden findings normalized to plain dicts with the 6 fields
+    assert r.golden_findings == [{
+        "file": "app.py", "line_start": 1, "line_end": 1,
+        "severity": "high", "category": "security", "message": "issue",
+    }]
+    # agent findings normalized the same way (from the scripted security node)
+    assert r.agent_findings[0]["file"] == "app.py"
+    assert r.agent_findings[0]["category"] == "security"
+    assert r.agent_findings[0]["message"] == "SQLi"
+    assert r.agent_findings[0]["line_start"] == 1

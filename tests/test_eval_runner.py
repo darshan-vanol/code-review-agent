@@ -21,19 +21,17 @@ def _golden(gid):
 
 
 def _passing_scorer(records):
-    return [{"id": r.id, "faithfulness": 0.9, "answer_correctness": 0.9}
-            for r in records]
+    return [{"id": r.id, "score": 0.9, "recall": 0.9} for r in records]
 
 
 def _failing_scorer(records):
-    return [{"id": r.id, "faithfulness": 0.5, "answer_correctness": 0.5}
-            for r in records]
+    return [{"id": r.id, "score": 0.5, "recall": 0.5} for r in records]
 
 
 def test_run_passes_and_writes_reports(tmp_path: Path):
     code = run(
         tmp_path, provider=MockProvider(), scorer=_passing_scorer,
-        goldens=[_golden("a"), _golden("b")],
+        goldens=[_golden("a"), _golden("b")], threshold=0.75,
     )
     assert code == 0
     json_files = list(tmp_path.glob("*.json"))
@@ -47,7 +45,7 @@ def test_run_passes_and_writes_reports(tmp_path: Path):
 def test_run_fails_below_threshold(tmp_path: Path):
     code = run(
         tmp_path, provider=MockProvider(), scorer=_failing_scorer,
-        goldens=[_golden("a")],
+        goldens=[_golden("a")], threshold=0.75,
     )
     assert code == 1
     report = json.loads(next(tmp_path.glob("*.json")).read_text())

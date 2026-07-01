@@ -21,13 +21,13 @@ it("shows an empty state when there are no reports", async () => {
 
 it("renders the table for the latest report", async () => {
   vi.mocked(getReports).mockResolvedValue([
-    { id: "1", passed: true, aggregate: { faithfulness: 0.9, answer_correctness: 0.9 } },
+    { id: "1", passed: true, aggregate: { score: 0.9, recall: 0.9 } },
   ]);
   vi.mocked(getReport).mockResolvedValue({
-    aggregate: { faithfulness: 0.9, answer_correctness: 0.9 },
+    aggregate: { score: 0.9, recall: 0.9 },
     threshold: 0.75,
     passed: true,
-    items: [{ id: "pr-x", faithfulness: 0.9, answer_correctness: 0.9 }],
+    items: [{ id: "pr-x", score: 0.9, recall: 0.9 }],
   });
   render(<EvalAnalytics />);
   expect(await screen.findByText("pr-x")).toBeInTheDocument();
@@ -36,14 +36,14 @@ it("renders the table for the latest report", async () => {
 
 it("shows a picker with two reports and switches the table on selection", async () => {
   vi.mocked(getReports).mockResolvedValue([
-    { id: "1", passed: false, aggregate: { faithfulness: 0.7, answer_correctness: 0.7 } },
-    { id: "2", passed: true, aggregate: { faithfulness: 0.9, answer_correctness: 0.9 } },
+    { id: "1", passed: false, aggregate: { score: 0.7, recall: 0.7 } },
+    { id: "2", passed: true, aggregate: { score: 0.9, recall: 0.9 } },
   ]);
   vi.mocked(getReport).mockImplementation(async (id) => ({
-    aggregate: { faithfulness: 0.9, answer_correctness: 0.9 },
+    aggregate: { score: 0.9, recall: 0.9 },
     threshold: 0.75,
     passed: id === "2",
-    items: [{ id: `pr-${id}`, faithfulness: 0.9, answer_correctness: 0.9 }],
+    items: [{ id: `pr-${id}`, score: 0.9, recall: 0.9 }],
   }));
 
   render(<EvalAnalytics />);
