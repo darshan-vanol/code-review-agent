@@ -22,5 +22,7 @@ def _accumulate(state: ReviewState, meta: dict) -> None:
     state.token_usage["input_tokens"] += meta["input_tokens"]
     state.token_usage["output_tokens"] += meta["output_tokens"]
     state.token_usage["latency_ms"] += meta["latency_ms"]
+    if meta.get("model"):
+        state.model = meta["model"]
     if meta["error"]:
         state.errors.append(meta["error"])

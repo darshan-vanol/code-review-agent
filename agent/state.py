@@ -68,6 +68,9 @@ class ReviewState(BaseModel):
     test_suggestions: list[Finding] = Field(default_factory=list)
     score: ReviewScore | None = None
     errors: list[str] = Field(default_factory=list)
+    # Model used by the LLM nodes this run (they all share one provider). Set by
+    # the LLM nodes so the tracer can label generation spans with the model.
+    model: str | None = None
 
     token_usage: dict[str, float] = Field(
         default_factory=lambda: {"input_tokens": 0, "output_tokens": 0, "latency_ms": 0.0}

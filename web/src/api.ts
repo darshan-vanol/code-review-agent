@@ -20,6 +20,7 @@ export interface Span {
   latency_ms: number;
   input_tokens: number;
   output_tokens: number;
+  model: string | null;
 }
 
 export interface ReviewResponse {
