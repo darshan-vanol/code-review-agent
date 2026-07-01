@@ -296,7 +296,6 @@ body { margin: 0; background: var(--bg); color: var(--text); -webkit-font-smooth
 .cell-score { display: flex; align-items: center; gap: 0.7rem; }
 .cell-score .meter { flex: 1; min-width: 70px; }
 .cell-score .num { font-family: var(--mono); font-size: 0.85rem; width: 2.6rem; text-align: right; font-variant-numeric: tabular-nums; }
-.cell-score .num.na { color: var(--faint); }
 
 .pill {
   font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
