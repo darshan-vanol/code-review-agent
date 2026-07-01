@@ -46,8 +46,9 @@ export interface EvalReportSummary {
 
 export interface EvalItem {
   id: string;
-  faithfulness: number;
-  answer_correctness: number;
+  // null when the judge failed to score the item (e.g. a truncated response).
+  faithfulness: number | null;
+  answer_correctness: number | null;
 }
 
 export interface EvalReport {
