@@ -45,3 +45,32 @@ def test_render_report_marks_fail():
     report, md = render_report(aggregate_scores(items), items)
     assert report["passed"] is False
     assert "FAIL" in md
+
+
+def test_aggregate_skips_missing_scores():
+    # A truncated judge response yields None for that metric; the mean should be
+    # over the scored items only, not crash or propagate NaN.
+    items = [
+        {"id": "a", "faithfulness": 0.8, "answer_correctness": None},
+        {"id": "b", "faithfulness": 0.6, "answer_correctness": 0.5},
+    ]
+    agg = aggregate_scores(items)
+    assert round(agg["faithfulness"], 3) == 0.7
+    assert round(agg["answer_correctness"], 3) == 0.5
+
+
+def test_aggregate_all_missing_metric_is_zero():
+    items = [
+        {"id": "a", "faithfulness": 0.8, "answer_correctness": None},
+        {"id": "b", "faithfulness": 0.6, "answer_correctness": None},
+    ]
+    assert aggregate_scores(items)["answer_correctness"] == 0.0
+
+
+def test_render_report_handles_missing_score():
+    items = [{"id": "x", "faithfulness": 0.5, "answer_correctness": None}]
+    report, md = render_report(aggregate_scores(items), items)
+    # None must survive into the report as JSON null (not NaN), and the markdown
+    # must render without raising on the None.
+    assert report["items"][0]["answer_correctness"] is None
+    assert "| x |" in md
