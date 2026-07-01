@@ -9,6 +9,7 @@ export function SpansPanel({ spans }: { spans: Span[] }) {
         <thead>
           <tr>
             <th>node</th>
+            <th>model</th>
             <th>latency (ms)</th>
             <th>in tok</th>
             <th>out tok</th>
@@ -18,6 +19,7 @@ export function SpansPanel({ spans }: { spans: Span[] }) {
           {spans.map((s) => (
             <tr key={s.name}>
               <td>{s.name}</td>
+              <td>{s.model ?? "—"}</td>
               <td>{s.latency_ms.toFixed(1)}</td>
               <td>{s.input_tokens}</td>
               <td>{s.output_tokens}</td>

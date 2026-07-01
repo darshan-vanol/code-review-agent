@@ -37,7 +37,13 @@ def run_llm_findings(
 
     Returns (findings, meta) where meta carries token/latency totals and an
     optional 'error' string when both attempts failed."""
-    meta = {"input_tokens": 0, "output_tokens": 0, "latency_ms": 0.0, "error": None}
+    meta = {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "latency_ms": 0.0,
+        "model": None,
+        "error": None,
+    }
     last_error = None
 
     for _ in range(_MAX_ATTEMPTS):
@@ -45,6 +51,7 @@ def run_llm_findings(
         meta["input_tokens"] += resp.input_tokens
         meta["output_tokens"] += resp.output_tokens
         meta["latency_ms"] += resp.latency_ms
+        meta["model"] = resp.model
         try:
             return _parse_findings(resp.text, category), meta
         except (json.JSONDecodeError, KeyError, TypeError, ValidationError) as e:
