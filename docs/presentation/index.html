@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code Review Assistant — Eval Harness &amp; Langfuse Observability</title>
+<style>
+  :root {
+    --bg: #0a0d12;
+    --bg-slide: #0d1117;
+    --fg: #e6edf3;
+    --muted: #8b949e;
+    --card: #131922;
+    --card-border: #232b36;
+    --green: #3fb950;
+    --red: #f85149;
+    --amber: #d29922;
+    --blue: #58a6ff;
+    --mono: "SF Mono", ui-monospace, "Cascadia Code", "Fira Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6vh 8vw;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
+      var(--bg-slide);
+  }
+
+  .slide.active { display: flex; }
+
+  .kicker {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-size: 2.6rem;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  h2 {
+    font-size: 2.1rem;
+    margin: 0 0 1.4rem 0;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 42em;
+  }
+
+  p { line-height: 1.55; }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+    margin-top: 1rem;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 1.3rem 1.4rem;
+  }
+
+  .card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.05rem;
+  }
+
+  .card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    margin-bottom: 0.6rem;
+    letter-spacing: 0.02em;
+  }
+
+  .tag.green { background: rgba(63,185,80,0.12); color: var(--green); border: 1px solid rgba(63,185,80,0.35); }
+  .tag.red   { background: rgba(248,81,73,0.12); color: var(--red); border: 1px solid rgba(248,81,73,0.35); }
+  .tag.amber { background: rgba(210,153,34,0.12); color: var(--amber); border: 1px solid rgba(210,153,34,0.35); }
+  .tag.blue  { background: rgba(88,166,255,0.12); color: var(--blue); border: 1px solid rgba(88,166,255,0.35); }
+
+  code, .mono {
+    font-family: var(--mono);
+  }
+
+  .formula {
+    font-family: var(--mono);
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-left: 3px solid var(--blue);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    font-size: 1rem;
+    color: var(--fg);
+    margin: 1rem 0;
+    white-space: pre-wrap;
+  }
+
+  .quote {
+    font-size: 1.4rem;
+    font-style: italic;
+    border-left: 3px solid var(--amber);
+    padding: 0.3rem 0 0.3rem 1.2rem;
+    margin: 1.4rem 0 0.4rem 0;
+    color: var(--fg);
+  }
+  .quote-attr {
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+  }
+
+  ul.plain { list-style: none; margin: 0.8rem 0 0 0; padding: 0; }
+  ul.plain li {
+    padding: 0.45rem 0 0.45rem 1.4rem;
+    position: relative;
+    line-height: 1.5;
+  }
+  ul.plain li::before {
+    content: "›";
+    position: absolute;
+    left: 0;
+    color: var(--blue);
+    font-weight: bold;
+  }
+
+  /* score bars — slide 3 */
+  .bars { margin-top: 1.6rem; max-width: 620px; }
+  .bar-row { margin-bottom: 1.1rem; }
+  .bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    margin-bottom: 0.35rem;
+    color: var(--muted);
+  }
+  .bar-track {
+    position: relative;
+    height: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    border-radius: 5px;
+  }
+  .bar-fill.red { background: var(--red); }
+  .bar-fill.green { background: var(--green); }
+  .gate-line {
+    position: absolute;
+    top: -4px; bottom: -4px;
+    width: 2px;
+    background: var(--fg);
+  }
+  .gate-line::after {
+    content: "gate 0.75";
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--fg);
+    white-space: nowrap;
+  }
+
+  /* stat chips */
+  .stats { display: flex; gap: 1rem; margin-top: 1.4rem; flex-wrap: wrap; }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 0.9rem 1.2rem;
+    min-width: 120px;
+  }
+  .stat .num { font-family: var(--mono); font-size: 1.6rem; color: var(--green); display: block; }
+  .stat .label { color: var(--muted); font-size: 0.8rem; }
+
+  /* tech stack chips */
+  .stack-group { margin-bottom: 1.1rem; }
+  .stack-group h4 {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0 0 0.5rem 0;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 0.3rem 0.65rem;
+    color: var(--fg);
+  }
+  .chip.optional { color: var(--muted); border-style: dashed; }
+
+  /* architecture diagram */
+  .diagram {
+    font-family: var(--mono);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 1.3rem 1.6rem;
+    white-space: pre;
+    overflow-x: auto;
+    margin-top: 1rem;
+  }
+  .diagram .a1 { color: var(--blue); }
+  .diagram .a2 { color: var(--green); }
+  .diagram .a3 { color: var(--amber); }
+
+  /* nav */
+  .nav {
+    position: fixed;
+    bottom: 20px;
+    right: 28px;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--muted);
+    z-index: 10;
+  }
+  .nav button {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    color: var(--fg);
+    border-radius: 6px;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .nav button:hover { border-color: var(--blue); color: var(--blue); }
+  .nav button:disabled { opacity: 0.3; cursor: default; }
+  .nav button:disabled:hover { border-color: var(--card-border); color: var(--fg); }
+
+  .brand {
+    position: fixed;
+    bottom: 20px;
+    left: 28px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    z-index: 10;
+  }
+
+  @media print {
+    html, body { overflow: visible; height: auto; }
+    .deck { height: auto; }
+    .slide {
+      position: relative;
+      display: flex !important;
+      page-break-after: always;
+      height: 100vh;
+    }
+    .nav, .brand { display: none; }
+  }
+
+  @media (max-width: 900px) {
+    h1 { font-size: 1.9rem; }
+    h2 { font-size: 1.5rem; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .slide { padding: 5vh 6vw; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- 1: Title -->
+  <section class="slide active">
+    <div class="kicker">AI Code Review Agent — Assignment Presentation</div>
+    <h1>Code Review Assistant</h1>
+    <p class="subtitle">An observable, multi-step AI code-review agent built on LangGraph and FastAPI —
+    with a purpose-built evaluation harness and per-node Langfuse tracing.</p>
+    <div class="stats">
+      <div class="stat"><span class="num">LangGraph</span><span class="label">agent core</span></div>
+      <div class="stat"><span class="num">Langfuse</span><span class="label">observability</span></div>
+      <div class="stat"><span class="num">20</span><span class="label">golden eval cases</span></div>
+    </div>
+  </section>
+
+  <!-- 2: Problem Statement -->
+  <section class="slide">
+    <div class="kicker">01 · Problem Statement</div>
+    <h2>Two problems, once you have an LLM agent in production</h2>
+    <div class="grid-2">
+      <div class="card">
+        <span class="tag blue">Evaluation</span>
+        <h3>Is the agent actually good?</h3>
+        <p>How do you tell — repeatably, offline, without a human re-reading every diff — whether
+        the agent catches the bugs it should? And can that check gate every PR in CI?</p>
+      </div>
+      <div class="card">
+        <span class="tag blue">Observability</span>
+        <h3>What happened inside the run?</h3>
+        <p>A review is several LLM calls chained together. Which step said what, using which model,
+        at what token cost and latency — and how do you see that without re-running it by hand?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3: The RAGAS Detour -->
+  <section class="slide">
+    <div class="kicker">02 · Problem Statement — The RAGAS Detour</div>
+    <h2>We started with RAGAS. The numbers didn't add up.</h2>
+    <p>RAGAS is the standard framework for evaluating LLM outputs, so it was the natural first choice.
+    Scored with a strong judge model (<code>llama-3.3-70b-versatile</code>) against a 0.75 gate:</p>
+    <div class="bars">
+      <div class="bar-row">
+        <div class="bar-label"><span>faithfulness</span><span>0.270</span></div>
+        <div class="bar-track">
+          <div class="bar-fill red" style="width:27%"></div>
+          <div class="gate-line" style="left:75%"></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label"><span>answer_correctness</span><span>0.400</span></div>
+        <div class="bar-track">
+          <div class="bar-fill red" style="width:40%"></div>
+          <div class="gate-line" style="left:75%"></div>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:1.6rem; color: var(--muted);">Yet manual inspection confirmed the agent's
+    findings were correct — SQL injection, hardcoded secret, null-deref, and SSRF were all detected
+    and matched the goldens.</p>
+  </section>
+
+  <!-- 4: Root Cause -->
+  <section class="slide">
+    <div class="kicker">03 · Root Cause</div>
+    <h2>RAGAS measures a RAG task. Code review isn't one.</h2>
+    <div class="grid-2">
+      <div class="card">
+        <span class="tag red">faithfulness</span>
+        <p><strong>Checks entailment from retrieved context.</strong> A review is analytical inference,
+        not extraction — a test-coverage suggestion like "missing test for X" is provably absent from
+        the diff text itself, so a strict NLI judge marks it unsupported every time.</p>
+      </div>
+      <div class="card">
+        <span class="tag red">answer_correctness</span>
+        <p><strong>Assumes one canonical reference answer.</strong> The agent correctly returns 3-4
+        findings per case; each extra correct finding counts as a false positive against a
+        single-finding reference, so the F1-based score collapses.</p>
+      </div>
+    </div>
+    <div class="quote">"A perfect reviewer cannot clear the gate. The eval measures the wrong thing."</div>
+    <div class="quote-attr">— project design notes, on why RAGAS was replaced as the gate</div>
+  </section>
+
+  <!-- 5: Solution — Eval Harness -->
+  <section class="slide">
+    <div class="kicker">04 · Solution — Evaluation Harness</div>
+    <h2>A detection-based scorer, matched to the actual task</h2>
+    <ul class="plain">
+      <li>Deterministic match per golden finding: same file, overlapping line range, same category.</li>
+      <li>Hybrid LLM "rescue" for anything left unmatched — fail-safe: a flaky judge can only rescue a miss, never downgrade a deterministic match.</li>
+      <li>Gates CI on the aggregate score; recall reported alongside but not gated.</li>
+    </ul>
+    <div class="formula">recall = matched_goldens / total_goldens
+score  = clamp(recall − 0.2 × false_positive_rate, 0, 1)</div>
+    <div class="stats">
+      <div class="stat"><span class="num">20</span><span class="label">golden cases</span></div>
+      <div class="stat"><span class="num">3</span><span class="label">categories · security / logic / test-coverage</span></div>
+      <div class="stat"><span class="num">3</span><span class="label">languages · Python / JS / Go</span></div>
+      <div class="stat"><span class="num">0.75</span><span class="label">CI gate threshold</span></div>
+    </div>
+  </section>
+
+  <!-- 6: Solution — Langfuse -->
+  <section class="slide">
+    <div class="kicker">05 · Solution — Langfuse Observability</div>
+    <h2>One trace per review. One span per step.</h2>
+    <div class="grid-2">
+      <div>
+        <ul class="plain">
+          <li>Every review emits one Langfuse trace with a child span per LangGraph node.</li>
+          <li>LLM nodes are <code>generation</code> observations carrying model name + input/output token counts — Langfuse auto-computes cost and latency.</li>
+          <li>Deterministic nodes (<code>ingest</code>, <code>aggregate</code>) are plain <code>span</code> observations.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Three-tier tracer</h3>
+        <p><span class="mono">NoOpTracer</span> → <span class="mono">RecordingTracer</span> → <span class="mono">LangfuseTracer</span></p>
+        <p style="margin-top:0.6rem;">Per-node spans are <strong>always</strong> returned inline in the API
+        response, even with Langfuse disabled. Langfuse is purely additive — never a dependency for
+        basic visibility.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7: Key Features -->
+  <section class="slide">
+    <div class="kicker">06 · Key Features</div>
+    <h2>What ships beyond the two headline pieces</h2>
+    <div class="grid-3">
+      <div class="card"><h3>Golden dataset + CI gate</h3><p>20 hand-authored cases; the eval job comments the score table directly on the PR and fails the build below threshold.</p></div>
+      <div class="card"><h3>Resilient LLM nodes</h3><p>Each node retries once on malformed output, then degrades to an empty finding list — a bad model response never crashes a review.</p></div>
+      <div class="card"><h3>Provider-agnostic adapters</h3><p>One <span class="mono">LLMProvider</span> protocol behind <span class="mono">mock</span> / <span class="mono">groq</span> / <span class="mono">gemini</span> — swap providers with one env var.</p></div>
+      <div class="card"><h3>Live dashboard</h3><p>Review Playground (paste a diff or PR URL) and Eval Analytics (score trends) in one Vite + React app.</p></div>
+      <div class="card"><h3>Offline-first dev loop</h3><p>The default <span class="mono">mock</span> provider runs the whole pipeline with zero API keys — trivial diffs even skip the LLM nodes entirely.</p></div>
+      <div class="card"><h3>Streaming reviews</h3><p><span class="mono">/review/stream</span> yields per-node progress as newline-delimited JSON for live UI updates.</p></div>
+    </div>
+  </section>
+
+  <!-- 8: Tech Stack -->
+  <section class="slide">
+    <div class="kicker">07 · Technology Stack</div>
+    <h2>Grouped by layer</h2>
+    <div class="grid-2">
+      <div>
+        <div class="stack-group">
+          <h4>Agent core</h4>
+          <div class="chips"><span class="chip">LangGraph</span><span class="chip">LangChain-core</span><span class="chip">Pydantic v2</span></div>
+        </div>
+        <div class="stack-group">
+          <h4>API</h4>
+          <div class="chips"><span class="chip">FastAPI</span><span class="chip">Uvicorn</span></div>
+        </div>
+        <div class="stack-group">
+          <h4>LLM providers</h4>
+          <div class="chips"><span class="chip">Groq</span><span class="chip">Gemini</span><span class="chip">mock (offline default)</span></div>
+        </div>
+        <div class="stack-group">
+          <h4>Observability</h4>
+          <div class="chips"><span class="chip">Langfuse SDK</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="stack-group">
+          <h4>Evaluation</h4>
+          <div class="chips">
+            <span class="chip">detection scorer (default)</span>
+            <span class="chip optional">RAGAS (kept, optional)</span>
+            <span class="chip optional">fastembed (kept, optional)</span>
+          </div>
+        </div>
+        <div class="stack-group">
+          <h4>Frontend</h4>
+          <div class="chips"><span class="chip">Vite</span><span class="chip">React</span><span class="chip">TypeScript</span></div>
+        </div>
+        <div class="stack-group">
+          <h4>CI / tooling</h4>
+          <div class="chips"><span class="chip">GitHub Actions</span><span class="chip">uv</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9: Architecture -->
+  <section class="slide">
+    <div class="kicker">08 · Architecture at a Glance</div>
+    <h2>What you evaluate is what you ship</h2>
+    <div class="diagram">   raw_diff
+      │
+      ▼
+ <span class="a1">┌──────────┐</span>   span         parse_diff() → files[]; is_trivial flag
+ <span class="a1">│  ingest  │</span>   (tracer)     (deterministic, no LLM)
+ <span class="a1">└────┬─────┘</span>
+      │  is_trivial? ──── True ───────────────────────────┐
+      ▼ False                                              │
+ <span class="a1">┌──────────┐</span>   generation    model + token usage
+ <span class="a1">│ security │</span>──▶<span class="a1">│  logic   │</span>──▶<span class="a1">│test_cov. │</span>   (LangfuseTracer)
+ <span class="a1">└──────────┘</span>   <span class="a1">└──────────┘</span>   <span class="a1">└────┬─────┘</span>
+      ▼                                                     ▼
+ <span class="a1">┌───────────┐</span>  span         ReviewScore.from_findings(...)
+ <span class="a1">│ aggregate │</span>◀──────────────────────────────────────────────────┘
+ <span class="a1">└────┬──────┘</span>
+      ▼
+     END → ReviewState{findings, score, token_usage, spans}
+      │
+      ├──▶ <span class="a2">api/</span>   POST /review   (same run_review() the eval harness calls)
+      └──▶ <span class="a3">evals/</span> build_records() → detection_scorer → gate @ 0.75</div>
+  </section>
+
+  <!-- 10: Takeaways -->
+  <section class="slide">
+    <div class="kicker">09 · Takeaways / What's Next</div>
+    <h2>Match the eval to the task — and keep the trail</h2>
+    <ul class="plain">
+      <li>RAGAS code was <strong>kept, not deleted</strong> — a documented, reversible decision (<span class="mono">evals/ragas_scorer.py</span> remains as an optional, non-gating alternative).</li>
+      <li>Observability should be additive: the system never depends on Langfuse being enabled to be debuggable.</li>
+      <li>A CI gate is only as good as the metric behind it — a failing gate should make you question the metric, not just the agent.</li>
+    </ul>
+    <h3 style="margin-top:1.6rem; color: var(--muted); font-family: var(--mono); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.06em;">Next up</h3>
+    <ul class="plain">
+      <li>Dedupe overlapping security/logic findings (a known noise source).</li>
+      <li>Re-baseline the 0.75 threshold against a stronger agent model.</li>
+    </ul>
+  </section>
+
+</div>
+
+<div class="brand mono">code-review-assistant</div>
+<div class="nav">
+  <button id="prevBtn" aria-label="Previous slide">‹</button>
+  <span id="counter">1 / 10</span>
+  <button id="nextBtn" aria-label="Next slide">›</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  let idx = 0;
+
+  function render() {
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+    counter.textContent = (idx + 1) + ' / ' + slides.length;
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === slides.length - 1;
+  }
+
+  function go(delta) {
+    idx = Math.min(slides.length - 1, Math.max(0, idx + delta));
+    render();
+  }
+
+  prevBtn.addEventListener('click', () => go(-1));
+  nextBtn.addEventListener('click', () => go(1));
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { go(1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { go(-1); }
+    else if (e.key === 'Home') { idx = 0; render(); }
+    else if (e.key === 'End') { idx = slides.length - 1; render(); }
+  });
+
+  render();
+</script>
+
+</body>
+</html>
