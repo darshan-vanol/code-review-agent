@@ -22,7 +22,13 @@ def run(out_dir: Path, *, provider=None, scorer=None, goldens=None,
         scorer = lambda records: score_by_detection(records, rescue=rescue)  # noqa: E731
     goldens = goldens if goldens is not None else load_golden()
 
+    print(
+        f"[eval] starting: {len(goldens)} golden case(s), provider={provider.model}",
+        file=sys.stderr,
+        flush=True,
+    )
     records = build_records(goldens, provider)
+    print("[eval] scoring...", file=sys.stderr, flush=True)
     per_item = scorer(records)
     scores = aggregate_scores(per_item)
     report, markdown = render_report(scores, per_item, threshold=threshold)

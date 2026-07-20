@@ -1,0 +1,190 @@
+{
+  "aggregate": {
+    "score": 0.8400000000000001,
+    "recall": 1.0
+  },
+  "threshold": 0.75,
+  "passed": true,
+  "items": [
+    {
+      "id": "01-sql-injection-py",
+      "score": 0.85,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 3,
+      "total_agent_findings": 4
+    },
+    {
+      "id": "02-hardcoded-secret-js",
+      "score": 0.8666666666666667,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 2,
+      "total_agent_findings": 3
+    },
+    {
+      "id": "03-path-traversal-py",
+      "score": 0.84,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 4,
+      "total_agent_findings": 5
+    },
+    {
+      "id": "04-unsafe-pickle-py",
+      "score": 0.8,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 5,
+      "total_agent_findings": 5
+    },
+    {
+      "id": "05-missing-auth-go",
+      "score": 0.8333333333333333,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 5,
+      "total_agent_findings": 6
+    },
+    {
+      "id": "06-command-injection-js",
+      "score": 0.8,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 5,
+      "total_agent_findings": 5
+    },
+    {
+      "id": "07-off-by-one-go",
+      "score": 0.8,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 3,
+      "total_agent_findings": 3
+    },
+    {
+      "id": "08-none-deref-py",
+      "score": 0.85,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 3,
+      "total_agent_findings": 4
+    },
+    {
+      "id": "09-unhandled-promise-js",
+      "score": 0.8666666666666667,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 4,
+      "total_agent_findings": 6
+    },
+    {
+      "id": "10-race-condition-go",
+      "score": 0.85,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 3,
+      "total_agent_findings": 4
+    },
+    {
+      "id": "11-div-by-zero-py",
+      "score": 0.8666666666666667,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 2,
+      "total_agent_findings": 3
+    },
+    {
+      "id": "12-wrong-comparison-js",
+      "score": 0.8,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 3,
+      "total_agent_findings": 3
+    },
+    {
+      "id": "13-swapped-args-go",
+      "score": 0.9,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 1,
+      "total_agent_findings": 2
+    },
+    {
+      "id": "14-no-test-new-func-py",
+      "score": 0.8666666666666667,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 4,
+      "total_agent_findings": 6
+    },
+    {
+      "id": "15-deleted-test-js",
+      "score": 0.8,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 4,
+      "total_agent_findings": 4
+    },
+    {
+      "id": "16-untested-error-branch-go",
+      "score": 0.84,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 4,
+      "total_agent_findings": 5
+    },
+    {
+      "id": "17-empty-input-untested-py",
+      "score": 0.88,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 3,
+      "total_agent_findings": 5
+    },
+    {
+      "id": "18-no-test-ts-func-js",
+      "score": 0.85,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 3,
+      "total_agent_findings": 4
+    },
+    {
+      "id": "19-nil-deref-go",
+      "score": 0.8,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 4,
+      "total_agent_findings": 4
+    },
+    {
+      "id": "20-ssrf-py",
+      "score": 0.84,
+      "recall": 1.0,
+      "matched": 1,
+      "total_goldens": 1,
+      "false_positives": 4,
+      "total_agent_findings": 5
+    }
+  ]
+}

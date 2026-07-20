@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import sys
 import time
 from collections.abc import Callable
 
@@ -85,7 +86,14 @@ class GroqProvider:
             )
             if resp.status_code == 429 or resp.status_code >= 500:
                 if attempt < self._max_retries:
-                    self._sleep(self._retry_wait(resp, attempt))
+                    wait = self._retry_wait(resp, attempt)
+                    print(
+                        f"[groq] HTTP {resp.status_code}, retry {attempt + 1}/"
+                        f"{self._max_retries} in {wait:.1f}s",
+                        file=sys.stderr,
+                        flush=True,
+                    )
+                    self._sleep(wait)
                     attempt += 1
                     continue
             resp.raise_for_status()

@@ -29,3 +29,10 @@ def test_run_review_skips_analysis_on_trivial_diff():
     assert result.is_trivial is True
     assert result.security_findings == []
     assert result.score.overall == 1.0
+
+
+def test_run_review_analyzes_unparsed_raw_code():
+    provider = MockProvider(scripted={"security": _SECURITY})
+    result = run_review('def foo():\n    return eval(input())\n', provider)
+    assert result.is_trivial is False
+    assert len(result.security_findings) == 1

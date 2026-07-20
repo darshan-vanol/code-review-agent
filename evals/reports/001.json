@@ -1,0 +1,190 @@
+{
+  "aggregate": {
+    "score": 0.0,
+    "recall": 0.0
+  },
+  "threshold": 0.75,
+  "passed": false,
+  "items": [
+    {
+      "id": "01-sql-injection-py",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "02-hardcoded-secret-js",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "03-path-traversal-py",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "04-unsafe-pickle-py",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "05-missing-auth-go",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "06-command-injection-js",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "07-off-by-one-go",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "08-none-deref-py",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "09-unhandled-promise-js",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "10-race-condition-go",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "11-div-by-zero-py",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "12-wrong-comparison-js",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "13-swapped-args-go",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "14-no-test-new-func-py",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "15-deleted-test-js",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "16-untested-error-branch-go",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "17-empty-input-untested-py",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "18-no-test-ts-func-js",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "19-nil-deref-go",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    },
+    {
+      "id": "20-ssrf-py",
+      "score": 0.0,
+      "recall": 0.0,
+      "matched": 0,
+      "total_goldens": 1,
+      "false_positives": 0,
+      "total_agent_findings": 0
+    }
+  ]
+}

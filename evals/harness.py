@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import sys
+
 from pydantic import BaseModel
 
 from agent.graph import run_review
@@ -55,10 +57,21 @@ def serialize_findings(findings: list) -> str:
 
 def build_records(goldens: list[GoldenPR], provider) -> list[EvalRecord]:
     records: list[EvalRecord] = []
-    for g in goldens:
+    total = len(goldens)
+    for i, g in enumerate(goldens, start=1):
+        print(
+            f"[eval] reviewing {g.id} ({i}/{total}) via {provider.model}...",
+            file=sys.stderr,
+            flush=True,
+        )
         state = run_review(g.diff, provider)
         agent_findings = (
             state.security_findings + state.logic_findings + state.test_suggestions
+        )
+        print(
+            f"[eval] {g.id}: {len(agent_findings)} finding(s)",
+            file=sys.stderr,
+            flush=True,
         )
         reference = f"{g.summary}\n{serialize_findings(g.findings)}"
         records.append(
